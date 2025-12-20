@@ -1,7 +1,7 @@
 import { Chip, TableCell, TableRow, Typography } from '@mui/material';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import type { Property } from '../types/Property';
+import type { Property } from '../../types/Property';
 
 interface PropertyTableRowProps {
   property: Property;

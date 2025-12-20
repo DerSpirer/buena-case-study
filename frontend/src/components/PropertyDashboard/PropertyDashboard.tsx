@@ -13,10 +13,10 @@ import {
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { mockProperties } from '../data/mockProperties';
+import { mockProperties } from '../../data/mockProperties';
 import PropertyTableRow from './PropertyTableRow';
 import StatCard from './StatCard';
-import PropertyCreationWizard from './PropertyCreationWizard';
+import PropertyCreationWizard from '../PropertyCreationWizard';
 
 export default function PropertyDashboard() {
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -80,3 +80,4 @@ export default function PropertyDashboard() {
     </Box>
   );
 }
+

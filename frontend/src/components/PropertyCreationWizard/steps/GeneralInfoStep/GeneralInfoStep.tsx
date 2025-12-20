@@ -16,7 +16,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { usePropertyCreationWizard, type ManagementType } from '../usePropertyCreationWizard';
+import { usePropertyCreationWizard, type ManagementType } from '../../usePropertyCreationWizard';
 
 export default function GeneralInfoStep() {
   const { formData, setFormData } = usePropertyCreationWizard();
@@ -249,3 +249,4 @@ export default function GeneralInfoStep() {
     </Box>
   );
 }
+
