@@ -18,7 +18,6 @@ export interface UnitFormData {
 }
 
 export interface BuildingFormData {
-  id: string;
   street: string;
   houseNumber: string;
   city: string;
