@@ -6,7 +6,6 @@ export type ManagementType = 'WEG' | 'MV';
 export type UnitType = 'Apartment' | 'Office' | 'Garden' | 'Parking';
 
 export interface UnitFormData {
-  id: string;
   unitNumber: string;
   type: UnitType;
   floor: number;
