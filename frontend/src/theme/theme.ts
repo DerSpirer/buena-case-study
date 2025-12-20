@@ -146,13 +146,9 @@ const theme = createTheme({
           borderRadius: 8,
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
-          transition: 'all 0.2s ease',
+          backgroundColor: '#6366f1',
           '&:hover': {
-            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-            boxShadow: '0 6px 20px rgba(99, 102, 241, 0.5)',
-            transform: 'translateY(-1px)',
+            backgroundColor: '#4f46e5',
           },
         },
       },

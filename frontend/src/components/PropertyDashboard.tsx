@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -15,11 +16,17 @@ import AddIcon from '@mui/icons-material/Add';
 import { mockProperties } from '../data/mockProperties';
 import PropertyTableRow from './PropertyTableRow';
 import StatCard from './StatCard';
+import PropertyCreationWizard from './PropertyCreationWizard';
 
 export default function PropertyDashboard() {
+  const [wizardOpen, setWizardOpen] = useState(false);
+
   const handleCreateProperty = () => {
-    // TODO: Open creation flow
-    console.log('Create property clicked');
+    setWizardOpen(true);
+  };
+
+  const handleCloseWizard = () => {
+    setWizardOpen(false);
   };
 
   return (
@@ -67,6 +74,9 @@ export default function PropertyDashboard() {
           </Table>
         </TableContainer>
       </Container>
+
+      {/* Property Creation Wizard */}
+      <PropertyCreationWizard open={wizardOpen} onClose={handleCloseWizard} />
     </Box>
   );
 }
