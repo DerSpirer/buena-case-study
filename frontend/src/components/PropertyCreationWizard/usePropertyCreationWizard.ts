@@ -1,11 +1,12 @@
 import { createContext, useContext } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
-// Types
+// Types matching backend DTOs
 export type ManagementType = 'WEG' | 'MV';
 export type UnitType = 'Apartment' | 'Office' | 'Garden' | 'Parking';
 
-export interface UnitFormData {
+// Matches CreateUnitDto
+export interface CreateUnitData {
   unitNumber: string;
   type: UnitType;
   floor: number;
@@ -16,44 +17,42 @@ export interface UnitFormData {
   rooms: number;
 }
 
-export interface BuildingFormData {
+// Matches CreateBuildingDto
+export interface CreateBuildingData {
   street: string;
   houseNumber: string;
   city: string;
   postalCode: string;
   country: string;
-  units: UnitFormData[];
+  units: CreateUnitData[];
 }
 
-export interface GeneralInfoFormData {
+// Matches CreatePropertyDto structure
+export interface CreatePropertyData {
   managementType: ManagementType | '';
   name: string;
   propertyManager: string;
   accountant: string;
   declarationFilePath: string;
+  buildings: CreateBuildingData[];
 }
 
-export interface PropertyFormData {
-  generalInfo: GeneralInfoFormData;
-  buildings: BuildingFormData[];
-}
-
-export const initialFormData: PropertyFormData = {
-  generalInfo: {
-    managementType: '',
-    name: '',
-    propertyManager: '',
-    accountant: '',
-    declarationFilePath: '',
-  },
+export const initialFormData: CreatePropertyData = {
+  managementType: '',
+  name: '',
+  propertyManager: '',
+  accountant: '',
+  declarationFilePath: '',
   buildings: [],
 };
 
 export interface PropertyCreationWizardContextValue {
-  formData: PropertyFormData;
-  setFormData: Dispatch<SetStateAction<PropertyFormData>>;
+  formData: CreatePropertyData;
+  setFormData: Dispatch<SetStateAction<CreatePropertyData>>;
   activeStep: number;
   setActiveStep: Dispatch<SetStateAction<number>>;
+  selectedBuildingIndex: number;
+  setSelectedBuildingIndex: Dispatch<SetStateAction<number>>;
   reset: () => void;
 }
 
@@ -66,4 +65,3 @@ export function usePropertyCreationWizard() {
   }
   return context;
 }
-

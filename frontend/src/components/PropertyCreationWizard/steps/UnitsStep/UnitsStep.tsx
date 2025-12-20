@@ -1,4 +1,5 @@
-import { useCallback, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import { useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -13,125 +14,25 @@ import {
 } from '@mui/material';
 import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
 import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { UnitFormData, UnitType } from '../../usePropertyCreationWizard';
 import EmptyBuildingsState from './EmptyBuildingsState';
 import BuildingSelector from './BuildingSelector';
 import UnitTableRow from './UnitTableRow';
 import UnitTableEmptyState from './UnitTableEmptyState';
 import UnitTableFooter from './UnitTableFooter';
 
-const createEmptyUnit = (): UnitFormData => ({
-  unitNumber: '',
-  type: 'Apartment' as UnitType,
-  floor: 0,
-  entrance: '',
-  size: 0,
-  coOwnershipShare: 0,
-  constructionYear: new Date().getFullYear(),
-  rooms: 0,
-});
-
-export default function UnitsStep() {
-  const { formData, setFormData } = usePropertyCreationWizard();
+const UnitsStep: FC = () => {
+  const { formData, selectedBuildingIndex } = usePropertyCreationWizard();
   const { buildings } = formData;
-  const [selectedBuildingIndex, setSelectedBuildingIndex] = useState<number>(0);
 
   // Ensure selectedBuildingIndex is valid
-  const validBuildingIndex = buildings.length > 0 
-    ? Math.min(selectedBuildingIndex, buildings.length - 1) 
-    : 0;
+  const validBuildingIndex =
+    buildings.length > 0 ? Math.min(selectedBuildingIndex, buildings.length - 1) : 0;
 
   const selectedBuilding = buildings[validBuildingIndex];
 
   const totalUnits = useMemo(
     () => buildings.reduce((sum, building) => sum + building.units.length, 0),
     [buildings]
-  );
-
-  const getBuildingLabel = useCallback((index: number) => {
-    const building = buildings[index];
-    return building.street && building.houseNumber
-      ? `${building.street} ${building.houseNumber}`
-      : `Building ${index + 1}`;
-  }, [buildings]);
-
-  const addUnit = useCallback(() => {
-    setFormData((prev) => ({
-      ...prev,
-      buildings: prev.buildings.map((building, i) =>
-        i === validBuildingIndex 
-          ? { ...building, units: [...building.units, createEmptyUnit()] } 
-          : building
-      ),
-    }));
-  }, [setFormData, validBuildingIndex]);
-
-  const addMultipleUnits = useCallback((count: number) => {
-    const newUnits = Array.from({ length: count }, createEmptyUnit);
-
-    setFormData((prev) => ({
-      ...prev,
-      buildings: prev.buildings.map((building, i) =>
-        i === validBuildingIndex 
-          ? { ...building, units: [...building.units, ...newUnits] } 
-          : building
-      ),
-    }));
-  }, [setFormData, validBuildingIndex]);
-
-  const duplicateUnit = useCallback((unitIndex: number) => {
-    const unitToDuplicate = selectedBuilding?.units[unitIndex];
-    if (!unitToDuplicate) return;
-
-    const duplicatedUnit: UnitFormData = {
-      ...unitToDuplicate,
-      unitNumber: '', // Clear unit number for the duplicate
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      buildings: prev.buildings.map((building, i) =>
-        i === validBuildingIndex
-          ? { ...building, units: [...building.units, duplicatedUnit] }
-          : building
-      ),
-    }));
-  }, [setFormData, validBuildingIndex, selectedBuilding]);
-
-  const updateUnit = useCallback(
-    (unitIndex: number, field: keyof UnitFormData, value: string | number) => {
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.map((building, bIdx) =>
-          bIdx === validBuildingIndex
-            ? {
-                ...building,
-                units: building.units.map((unit, uIdx) =>
-                  uIdx === unitIndex ? { ...unit, [field]: value } : unit
-                ),
-              }
-            : building
-        ),
-      }));
-    },
-    [setFormData, validBuildingIndex]
-  );
-
-  const deleteUnit = useCallback(
-    (unitIndex: number) => {
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.map((building, bIdx) =>
-          bIdx === validBuildingIndex
-            ? {
-                ...building,
-                units: building.units.filter((_, uIdx) => uIdx !== unitIndex),
-              }
-            : building
-        ),
-      }));
-    },
-    [setFormData, validBuildingIndex]
   );
 
   // If no buildings exist, show a message
@@ -142,7 +43,15 @@ export default function UnitsStep() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
+        }}
+      >
         <Box>
           <Typography variant="h6" fontWeight={600} color="text.primary" sx={{ mb: 1 }}>
             Unit Management
@@ -161,13 +70,7 @@ export default function UnitsStep() {
       </Box>
 
       {/* Building Selector & Actions */}
-      <BuildingSelector
-        buildings={buildings}
-        selectedBuildingIndex={validBuildingIndex}
-        onBuildingChange={setSelectedBuildingIndex}
-        onAddUnit={addUnit}
-        onAddMultipleUnits={addMultipleUnits}
-      />
+      <BuildingSelector />
 
       {/* Units Table */}
       <Paper sx={{ overflow: 'hidden' }}>
@@ -183,22 +86,17 @@ export default function UnitsStep() {
                 <TableCell sx={{ width: 70, py: 1.5 }}>Rooms</TableCell>
                 <TableCell sx={{ width: 90, py: 1.5 }}>Share (%)</TableCell>
                 <TableCell sx={{ width: 90, py: 1.5 }}>Built</TableCell>
-                <TableCell sx={{ width: 80, py: 1.5 }} align="center">Actions</TableCell>
+                <TableCell sx={{ width: 80, py: 1.5 }} align="center">
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {selectedBuilding?.units.length === 0 ? (
                 <UnitTableEmptyState />
               ) : (
-                selectedBuilding?.units.map((unit, unitIndex) => (
-                  <UnitTableRow
-                    key={unitIndex}
-                    unit={unit}
-                    unitIndex={unitIndex}
-                    onUpdate={updateUnit}
-                    onDuplicate={duplicateUnit}
-                    onDelete={deleteUnit}
-                  />
+                selectedBuilding?.units.map((_, unitIndex) => (
+                  <UnitTableRow key={unitIndex} unitIndex={unitIndex} />
                 ))
               )}
             </TableBody>
@@ -206,13 +104,10 @@ export default function UnitsStep() {
         </TableContainer>
 
         {/* Quick summary footer */}
-        {selectedBuilding && (
-          <UnitTableFooter
-            units={selectedBuilding.units}
-            buildingLabel={getBuildingLabel(validBuildingIndex)}
-          />
-        )}
+        {selectedBuilding && <UnitTableFooter />}
       </Paper>
     </Box>
   );
-}
+};
+
+export default UnitsStep;

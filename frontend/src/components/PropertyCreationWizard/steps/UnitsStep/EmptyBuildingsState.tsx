@@ -1,7 +1,8 @@
+import type { FC } from 'react';
 import { Box, Typography, alpha } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
-export default function EmptyBuildingsState() {
+const EmptyBuildingsState: FC = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box>
@@ -51,5 +52,7 @@ export default function EmptyBuildingsState() {
       </Box>
     </Box>
   );
-}
+};
+
+export default EmptyBuildingsState;
 

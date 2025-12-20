@@ -142,8 +142,17 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          padding: '12px 24px',
           borderRadius: 8,
+        },
+        sizeSmall: {
+          padding: '4px 12px',
+          fontSize: '0.8125rem',
+        },
+        sizeMedium: {
+          padding: '6px 16px',
+        },
+        sizeLarge: {
+          padding: '10px 24px',
         },
         containedPrimary: {
           backgroundColor: '#6366f1',

@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import type { FC } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -11,20 +12,25 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
 
-interface DeclarationUploadProps {
-  onFileChange: (fileName: string) => void;
-}
-
-export default function DeclarationUpload({ onFileChange }: DeclarationUploadProps) {
+const DeclarationUpload: FC = () => {
+  const { setFormData } = usePropertyCreationWizard();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  const updateFilePath = useCallback(
+    (fileName: string) => {
+      setFormData((prev) => ({ ...prev, declarationFilePath: fileName }));
+    },
+    [setFormData]
+  );
+
   const handleFileChange = (file: File | null) => {
     if (file && file.type === 'application/pdf') {
       setUploadedFile(file);
-      onFileChange(file.name);
+      updateFilePath(file.name);
     }
   };
 
@@ -52,7 +58,7 @@ export default function DeclarationUpload({ onFileChange }: DeclarationUploadPro
 
   const handleRemoveFile = () => {
     setUploadedFile(null);
-    onFileChange('');
+    updateFilePath('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -179,5 +185,6 @@ export default function DeclarationUpload({ onFileChange }: DeclarationUploadPro
       )}
     </Box>
   );
-}
+};
 
+export default DeclarationUpload;

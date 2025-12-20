@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+import { useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -7,14 +9,19 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import type { GeneralInfoFormData, ManagementType } from '../../usePropertyCreationWizard';
+import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
+import type { CreatePropertyData, ManagementType } from '../../usePropertyCreationWizard';
 
-interface PropertyDetailsFormProps {
-  generalInfo: GeneralInfoFormData;
-  onFieldChange: (field: keyof GeneralInfoFormData, value: string) => void;
-}
+const PropertyDetailsForm: FC = () => {
+  const { formData, setFormData } = usePropertyCreationWizard();
 
-export default function PropertyDetailsForm({ generalInfo, onFieldChange }: PropertyDetailsFormProps) {
+  const updateField = useCallback(
+    <K extends keyof CreatePropertyData>(field: K, value: CreatePropertyData[K]) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    [setFormData]
+  );
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Typography variant="h6" fontWeight={600} color="text.primary">
@@ -26,9 +33,9 @@ export default function PropertyDetailsForm({ generalInfo, onFieldChange }: Prop
           <InputLabel id="management-type-label">Management Type</InputLabel>
           <Select
             labelId="management-type-label"
-            value={generalInfo.managementType}
+            value={formData.managementType}
             label="Management Type"
-            onChange={(e) => onFieldChange('managementType', e.target.value as ManagementType)}
+            onChange={(e) => updateField('managementType', e.target.value as ManagementType)}
           >
             <MenuItem value="WEG">WEG</MenuItem>
             <MenuItem value="MV">MV</MenuItem>
@@ -37,8 +44,8 @@ export default function PropertyDetailsForm({ generalInfo, onFieldChange }: Prop
 
         <TextField
           label="Property Name"
-          value={generalInfo.name}
-          onChange={(e) => onFieldChange('name', e.target.value)}
+          value={formData.name}
+          onChange={(e) => updateField('name', e.target.value)}
           placeholder="e.g., Sonnenhof Residenz"
           fullWidth
         />
@@ -47,21 +54,22 @@ export default function PropertyDetailsForm({ generalInfo, onFieldChange }: Prop
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
         <TextField
           label="Property Manager"
-          value={generalInfo.propertyManager}
-          onChange={(e) => onFieldChange('propertyManager', e.target.value)}
+          value={formData.propertyManager}
+          onChange={(e) => updateField('propertyManager', e.target.value)}
           placeholder="e.g., Anna Schmidt"
           fullWidth
         />
 
         <TextField
           label="Accountant"
-          value={generalInfo.accountant}
-          onChange={(e) => onFieldChange('accountant', e.target.value)}
+          value={formData.accountant}
+          onChange={(e) => updateField('accountant', e.target.value)}
           placeholder="e.g., Klaus Fischer"
           fullWidth
         />
       </Box>
     </Box>
   );
-}
+};
 
+export default PropertyDetailsForm;

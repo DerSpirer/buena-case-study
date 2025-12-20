@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+import { memo, useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -11,22 +13,41 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useState } from 'react';
-import type { BuildingFormData } from '../../usePropertyCreationWizard';
+import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
+import type { CreateBuildingData } from '../../usePropertyCreationWizard';
 
 interface BuildingCardProps {
-  building: BuildingFormData;
   index: number;
-  onUpdate: (index: number, field: keyof BuildingFormData, value: string) => void;
-  onDelete: (index: number) => void;
 }
 
-export default function BuildingCard({ building, index, onUpdate, onDelete }: BuildingCardProps) {
+const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
+  const { formData, setFormData } = usePropertyCreationWizard();
+  const building = formData.buildings[index];
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const displayAddress = building.street && building.houseNumber
-    ? `${building.street} ${building.houseNumber}`
-    : `Building ${index + 1}`;
+  const updateField = useCallback(
+    (field: keyof CreateBuildingData, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        buildings: prev.buildings.map((b, i) => (i === index ? { ...b, [field]: value } : b)),
+      }));
+    },
+    [setFormData, index]
+  );
+
+  const handleDelete = useCallback(() => {
+    setFormData((prev) => ({
+      ...prev,
+      buildings: prev.buildings.filter((_, i) => i !== index),
+    }));
+  }, [setFormData, index]);
+
+  if (!building) return null;
+
+  const displayAddress =
+    building.street && building.houseNumber
+      ? `${building.street} ${building.houseNumber}`
+      : `Building ${index + 1}`;
 
   return (
     <Paper
@@ -83,7 +104,7 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(index);
+            handleDelete();
           }}
           sx={{
             color: 'text.secondary',
@@ -108,7 +129,7 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
             <TextField
               label="Street"
               value={building.street}
-              onChange={(e) => onUpdate(index, 'street', e.target.value)}
+              onChange={(e) => updateField('street', e.target.value)}
               placeholder="e.g., Musterstraße"
               fullWidth
               size="small"
@@ -116,7 +137,7 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
             <TextField
               label="House Number"
               value={building.houseNumber}
-              onChange={(e) => onUpdate(index, 'houseNumber', e.target.value)}
+              onChange={(e) => updateField('houseNumber', e.target.value)}
               placeholder="e.g., 42a"
               fullWidth
               size="small"
@@ -128,7 +149,7 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
             <TextField
               label="Postal Code"
               value={building.postalCode}
-              onChange={(e) => onUpdate(index, 'postalCode', e.target.value)}
+              onChange={(e) => updateField('postalCode', e.target.value)}
               placeholder="e.g., 10115"
               fullWidth
               size="small"
@@ -136,7 +157,7 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
             <TextField
               label="City"
               value={building.city}
-              onChange={(e) => onUpdate(index, 'city', e.target.value)}
+              onChange={(e) => updateField('city', e.target.value)}
               placeholder="e.g., Berlin"
               fullWidth
               size="small"
@@ -148,7 +169,7 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
             <TextField
               label="Country"
               value={building.country}
-              onChange={(e) => onUpdate(index, 'country', e.target.value)}
+              onChange={(e) => updateField('country', e.target.value)}
               placeholder="e.g., Germany"
               fullWidth
               size="small"
@@ -178,5 +199,6 @@ export default function BuildingCard({ building, index, onUpdate, onDelete }: Bu
       </Collapse>
     </Paper>
   );
-}
+};
 
+export default memo(BuildingCard);

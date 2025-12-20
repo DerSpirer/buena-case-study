@@ -1,13 +1,18 @@
+import type { FC } from 'react';
 import { Box, Typography, alpha } from '@mui/material';
-import type { UnitFormData } from '../../usePropertyCreationWizard';
+import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
 
-interface UnitTableFooterProps {
-  units: UnitFormData[];
-  buildingLabel: string;
-}
+const UnitTableFooter: FC = () => {
+  const { formData, selectedBuildingIndex } = usePropertyCreationWizard();
+  const building = formData.buildings[selectedBuildingIndex];
+  const units = building?.units ?? [];
 
-export default function UnitTableFooter({ units, buildingLabel }: UnitTableFooterProps) {
   if (units.length === 0) return null;
+
+  const buildingLabel =
+    building?.street && building?.houseNumber
+      ? `${building.street} ${building.houseNumber}`
+      : `Building ${selectedBuildingIndex + 1}`;
 
   const totalSize = units.reduce((sum, u) => sum + u.size, 0);
   const totalShare = units.reduce((sum, u) => sum + u.coOwnershipShare, 0);
@@ -36,5 +41,6 @@ export default function UnitTableFooter({ units, buildingLabel }: UnitTableFoote
       </Typography>
     </Box>
   );
-}
+};
 
+export default UnitTableFooter;

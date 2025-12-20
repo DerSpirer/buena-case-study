@@ -1,17 +1,18 @@
+import type { FC } from 'react';
 import { useCallback } from 'react';
 import { Box, Typography, Button, alpha } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { BuildingFormData } from '../../usePropertyCreationWizard';
+import type { CreateBuildingData } from '../../usePropertyCreationWizard';
 import BuildingCard from './BuildingCard';
 
-export default function BuildingDataStep() {
+const BuildingDataStep: FC = () => {
   const { formData, setFormData } = usePropertyCreationWizard();
   const { buildings } = formData;
 
   const addBuilding = useCallback(() => {
-    const newBuilding: BuildingFormData = {
+    const newBuilding: CreateBuildingData = {
       street: '',
       houseNumber: '',
       city: '',
@@ -25,28 +26,6 @@ export default function BuildingDataStep() {
       buildings: [...prev.buildings, newBuilding],
     }));
   }, [setFormData]);
-
-  const updateBuilding = useCallback(
-    (index: number, field: keyof BuildingFormData, value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.map((building, i) =>
-          i === index ? { ...building, [field]: value } : building
-        ),
-      }));
-    },
-    [setFormData]
-  );
-
-  const deleteBuilding = useCallback(
-    (index: number) => {
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.filter((_, i) => i !== index),
-      }));
-    },
-    [setFormData]
-  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -97,25 +76,14 @@ export default function BuildingDataStep() {
               Start by adding the first building to your property
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={addBuilding}
-            sx={{ mt: 1 }}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={addBuilding} sx={{ mt: 1 }}>
             Add First Building
           </Button>
         </Box>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {buildings.map((building, index) => (
-            <BuildingCard
-              key={index}
-              building={building}
-              index={index}
-              onUpdate={updateBuilding}
-              onDelete={deleteBuilding}
-            />
+          {buildings.map((_, index) => (
+            <BuildingCard key={index} index={index} />
           ))}
 
           {/* Add More Button */}
@@ -137,4 +105,6 @@ export default function BuildingDataStep() {
       )}
     </Box>
   );
-}
+};
+
+export default BuildingDataStep;

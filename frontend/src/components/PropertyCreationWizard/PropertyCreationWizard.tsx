@@ -31,7 +31,7 @@ const steps = [
 ];
 
 function WizardContent({ onClose }: { onClose: () => void }) {
-  const { formData, activeStep, setActiveStep, reset } = usePropertyCreationWizard();
+  const { activeStep, setActiveStep, reset } = usePropertyCreationWizard();
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
@@ -46,7 +46,7 @@ function WizardContent({ onClose }: { onClose: () => void }) {
   };
 
   const handleSubmit = () => {
-    console.log('Creating property...', formData);
+    // TODO: Submit formData to API
     handleClose();
   };
 

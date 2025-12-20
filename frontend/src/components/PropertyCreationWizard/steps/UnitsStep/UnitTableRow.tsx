@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+import { memo, useCallback } from 'react';
 import {
   Box,
   TableCell,
@@ -10,29 +12,71 @@ import {
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import type { UnitFormData, UnitType } from '../../usePropertyCreationWizard';
+import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
+import type { CreateUnitData, UnitType } from '../../usePropertyCreationWizard';
 
 const unitTypeOptions: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 
 interface UnitTableRowProps {
-  unit: UnitFormData;
   unitIndex: number;
-  onUpdate: (unitIndex: number, field: keyof UnitFormData, value: string | number) => void;
-  onDuplicate: (unitIndex: number) => void;
-  onDelete: (unitIndex: number) => void;
 }
 
-export default function UnitTableRow({
-  unit,
-  unitIndex,
-  onUpdate,
-  onDuplicate,
-  onDelete,
-}: UnitTableRowProps) {
-  const handleNumberChange = (field: keyof UnitFormData, value: string) => {
+const UnitTableRow: FC<UnitTableRowProps> = ({ unitIndex }) => {
+  const { formData, setFormData, selectedBuildingIndex } = usePropertyCreationWizard();
+  const unit = formData.buildings[selectedBuildingIndex]?.units[unitIndex];
+
+  const updateField = useCallback(
+    (field: keyof CreateUnitData, value: string | number) => {
+      setFormData((prev) => ({
+        ...prev,
+        buildings: prev.buildings.map((building, bIdx) =>
+          bIdx === selectedBuildingIndex
+            ? {
+                ...building,
+                units: building.units.map((u, uIdx) =>
+                  uIdx === unitIndex ? { ...u, [field]: value } : u
+                ),
+              }
+            : building
+        ),
+      }));
+    },
+    [setFormData, selectedBuildingIndex, unitIndex]
+  );
+
+  const handleDuplicate = useCallback(() => {
+    setFormData((prev) => {
+      const unitToDuplicate = prev.buildings[selectedBuildingIndex]?.units[unitIndex];
+      if (!unitToDuplicate) return prev;
+
+      return {
+        ...prev,
+        buildings: prev.buildings.map((building, i) =>
+          i === selectedBuildingIndex
+            ? { ...building, units: [...building.units, { ...unitToDuplicate, unitNumber: '' }] }
+            : building
+        ),
+      };
+    });
+  }, [setFormData, selectedBuildingIndex, unitIndex]);
+
+  const handleDelete = useCallback(() => {
+    setFormData((prev) => ({
+      ...prev,
+      buildings: prev.buildings.map((building, bIdx) =>
+        bIdx === selectedBuildingIndex
+          ? { ...building, units: building.units.filter((_, uIdx) => uIdx !== unitIndex) }
+          : building
+      ),
+    }));
+  }, [setFormData, selectedBuildingIndex, unitIndex]);
+
+  const handleNumberChange = (field: keyof CreateUnitData, value: string) => {
     const numValue = value === '' ? 0 : Number(value);
-    onUpdate(unitIndex, field, numValue);
+    updateField(field, numValue);
   };
+
+  if (!unit) return null;
 
   const inputSx = {
     '& .MuiInputBase-input': {
@@ -52,7 +96,7 @@ export default function UnitTableRow({
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           value={unit.unitNumber}
-          onChange={(e) => onUpdate(unitIndex, 'unitNumber', e.target.value)}
+          onChange={(e) => updateField('unitNumber', e.target.value)}
           placeholder="A101"
           size="small"
           variant="standard"
@@ -65,7 +109,7 @@ export default function UnitTableRow({
         <TextField
           select
           value={unit.type}
-          onChange={(e) => onUpdate(unitIndex, 'type', e.target.value as UnitType)}
+          onChange={(e) => updateField('type', e.target.value as UnitType)}
           size="small"
           variant="standard"
           fullWidth
@@ -98,7 +142,7 @@ export default function UnitTableRow({
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           value={unit.entrance}
-          onChange={(e) => onUpdate(unitIndex, 'entrance', e.target.value)}
+          onChange={(e) => updateField('entrance', e.target.value)}
           placeholder="A"
           size="small"
           variant="standard"
@@ -176,7 +220,7 @@ export default function UnitTableRow({
           <Tooltip title="Duplicate unit">
             <IconButton
               size="small"
-              onClick={() => onDuplicate(unitIndex)}
+              onClick={handleDuplicate}
               sx={{
                 color: 'text.secondary',
                 '&:hover': {
@@ -191,7 +235,7 @@ export default function UnitTableRow({
           <Tooltip title="Delete unit">
             <IconButton
               size="small"
-              onClick={() => onDelete(unitIndex)}
+              onClick={handleDelete}
               sx={{
                 color: 'text.secondary',
                 '&:hover': {
@@ -207,5 +251,6 @@ export default function UnitTableRow({
       </TableCell>
     </TableRow>
   );
-}
+};
 
+export default memo(UnitTableRow);

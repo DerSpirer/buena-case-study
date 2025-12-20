@@ -1,7 +1,8 @@
+import type { FC } from 'react';
 import { Box, TableCell, TableRow, Typography } from '@mui/material';
 import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
 
-export default function UnitTableEmptyState() {
+const UnitTableEmptyState: FC = () => {
   return (
     <TableRow>
       <TableCell colSpan={9} sx={{ py: 4 }}>
@@ -22,5 +23,7 @@ export default function UnitTableEmptyState() {
       </TableCell>
     </TableRow>
   );
-}
+};
+
+export default UnitTableEmptyState;
 
