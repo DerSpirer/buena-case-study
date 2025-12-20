@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto';
 import { Property } from './entities';
@@ -18,7 +25,7 @@ export class PropertyController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Property> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Property> {
     return this.propertyService.findOne(id);
   }
 }
