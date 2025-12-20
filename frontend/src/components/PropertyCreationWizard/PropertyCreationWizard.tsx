@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Box,
   Button,
@@ -17,6 +16,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import GeneralInfoStep from './steps/GeneralInfoStep';
 import BuildingDataStep from './steps/BuildingDataStep';
 import UnitsStep from './steps/UnitsStep';
+import PropertyCreationWizardProvider from './PropertyCreationWizardProvider';
+import { usePropertyCreationWizard } from './usePropertyCreationWizard';
 
 interface PropertyCreationWizardProps {
   open: boolean;
@@ -29,12 +30,11 @@ const steps = [
   { label: 'Units', description: 'Apartments, offices & more' },
 ];
 
-export default function PropertyCreationWizard({ open, onClose }: PropertyCreationWizardProps) {
-  const [activeStep, setActiveStep] = useState(0);
+function WizardContent({ onClose }: { onClose: () => void }) {
+  const { formData, activeStep, setActiveStep, reset } = usePropertyCreationWizard();
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
-      // Final step - submit
       handleSubmit();
     } else {
       setActiveStep((prev) => prev + 1);
@@ -46,13 +46,12 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
   };
 
   const handleSubmit = () => {
-    // TODO: Submit property creation
-    console.log('Creating property...');
+    console.log('Creating property...', formData);
     handleClose();
   };
 
   const handleClose = () => {
-    setActiveStep(0);
+    reset();
     onClose();
   };
 
@@ -72,23 +71,7 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
   const isLastStep = activeStep === steps.length - 1;
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      slotProps={{
-        paper: {
-          sx: {
-            borderRadius: 2,
-            minHeight: '70vh',
-            maxHeight: '90vh',
-            display: 'flex',
-            flexDirection: 'column' as const,
-          },
-        },
-      }}
-    >
+    <>
       {/* Header */}
       <Box
         sx={{
@@ -100,7 +83,6 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
           bgcolor: 'background.paper',
         }}
       >
-        {/* Title row */}
         <Box
           sx={{
             display: 'flex',
@@ -122,7 +104,6 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
           </IconButton>
         </Box>
 
-        {/* Stepper */}
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map((step, index) => (
             <Step key={step.label} completed={index < activeStep}>
@@ -173,9 +154,7 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
           onClick={handleBack}
           disabled={activeStep === 0}
           startIcon={<ArrowBackIcon />}
-          sx={{
-            visibility: activeStep === 0 ? 'hidden' : 'visible',
-          }}
+          sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
         >
           Back
         </Button>
@@ -192,7 +171,32 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
           {isLastStep ? 'Create Property' : 'Next'}
         </Button>
       </Box>
-    </Dialog>
+    </>
   );
 }
 
+export default function PropertyCreationWizard({ open, onClose }: PropertyCreationWizardProps) {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 2,
+            minHeight: '70vh',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column' as const,
+          },
+        },
+      }}
+    >
+      <PropertyCreationWizardProvider>
+        <WizardContent onClose={onClose} />
+      </PropertyCreationWizardProvider>
+    </Dialog>
+  );
+}
