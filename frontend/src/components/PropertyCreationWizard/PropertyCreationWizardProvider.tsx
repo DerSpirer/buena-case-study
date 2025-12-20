@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import {
   PropertyCreationWizardContext,
@@ -10,10 +10,10 @@ export default function PropertyCreationWizardProvider({ children }: { children:
   const [formData, setFormData] = useState<PropertyFormData>(initialFormData);
   const [activeStep, setActiveStep] = useState(0);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setFormData(initialFormData);
     setActiveStep(0);
-  };
+  }, []);
 
   return (
     <PropertyCreationWizardContext.Provider value={{ formData, setFormData, activeStep, setActiveStep, reset }}>
