@@ -32,7 +32,7 @@ declare module '@mui/material/Typography' {
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
       main: '#6366f1',
       light: '#818cf8',
@@ -44,16 +44,16 @@ const theme = createTheme({
       dark: '#059669',
     },
     background: {
-      default: '#0f172a',
-      paper: 'rgba(30, 41, 59, 0.7)',
-      paperLight: 'rgba(30, 41, 59, 0.5)',
-      gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+      default: '#f8fafc',
+      paper: 'rgba(255, 255, 255, 0.9)',
+      paperLight: 'rgba(255, 255, 255, 0.6)',
+      gradient: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)',
     },
     text: {
-      primary: '#f8fafc',
-      secondary: '#94a3b8',
+      primary: '#1e293b',
+      secondary: '#64748b',
     },
-    divider: 'rgba(148, 163, 184, 0.1)',
+    divider: 'rgba(100, 116, 139, 0.15)',
     grey: {
       300: '#cbd5e1',
       600: '#64748b',
@@ -123,16 +123,16 @@ const theme = createTheme({
         }
         
         ::-webkit-scrollbar-track {
-          background: rgba(30, 41, 59, 0.5);
+          background: rgba(226, 232, 240, 0.8);
         }
         
         ::-webkit-scrollbar-thumb {
-          background: rgba(99, 102, 241, 0.4);
+          background: rgba(99, 102, 241, 0.5);
           border-radius: 4px;
         }
         
         ::-webkit-scrollbar-thumb:hover {
-          background: rgba(99, 102, 241, 0.6);
+          background: rgba(99, 102, 241, 0.7);
         }
       `,
     },
@@ -162,7 +162,7 @@ const theme = createTheme({
         root: {
           backgroundImage: 'none',
           backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
+          border: '1px solid rgba(100, 116, 139, 0.15)',
         },
       },
     },
@@ -170,14 +170,14 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)',
+          boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
         root: {
-          borderBottom: '1px solid rgba(148, 163, 184, 0.08)',
+          borderBottom: '1px solid rgba(100, 116, 139, 0.12)',
           padding: '20px 16px',
         },
         head: {
@@ -185,8 +185,8 @@ const theme = createTheme({
           fontSize: '0.75rem',
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
-          color: '#94a3b8',
-          borderBottom: '1px solid rgba(148, 163, 184, 0.1)',
+          color: '#64748b',
+          borderBottom: '1px solid rgba(100, 116, 139, 0.15)',
           padding: '16px',
         },
         body: {
@@ -199,7 +199,7 @@ const theme = createTheme({
         root: {
           transition: 'background 0.15s ease',
           '&:hover': {
-            background: 'rgba(99, 102, 241, 0.05)',
+            background: 'rgba(99, 102, 241, 0.06)',
           },
           '&:last-child td': {
             borderBottom: 0,
@@ -222,7 +222,7 @@ const theme = createTheme({
         {
           props: { color: 'primary' },
           style: {
-            backgroundColor: 'rgba(99, 102, 241, 0.12)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
             color: '#4f46e5',
             '& .MuiChip-icon': {
               color: 'inherit',
@@ -232,8 +232,8 @@ const theme = createTheme({
         {
           props: { color: 'secondary' },
           style: {
-            backgroundColor: 'rgba(16, 185, 129, 0.12)',
-            color: '#059669',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            color: '#047857',
             '& .MuiChip-icon': {
               color: 'inherit',
             },

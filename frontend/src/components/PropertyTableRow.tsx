@@ -24,7 +24,7 @@ export default function PropertyTableRow({ property }: PropertyTableRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <Typography variant="mono" color="grey.300">
+        <Typography variant="mono" color="grey.600">
           {property.uniqueNumber}
         </Typography>
       </TableCell>
