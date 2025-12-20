@@ -1,5 +1,7 @@
+import PropertyDashboard from './components/PropertyDashboard';
+
 function App() {
-  return <></>
+  return <PropertyDashboard />;
 }
 
-export default App
+export default App;
