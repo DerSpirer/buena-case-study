@@ -75,9 +75,8 @@ function WizardContent({ onClose }: { onClose: () => void }) {
       {/* Header */}
       <Box
         sx={{
-          px: 4,
-          pt: 3,
-          pb: 3,
+          px: 2.5,
+          py: 1.5,
           borderBottom: '1px solid',
           borderColor: 'divider',
           bgcolor: 'background.paper',
@@ -86,33 +85,37 @@ function WizardContent({ onClose }: { onClose: () => void }) {
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             justifyContent: 'space-between',
-            mb: 3,
+            mb: 1.5,
           }}
         >
-          <Box>
-            <Typography variant="h5" fontWeight={600} color="text.primary">
-              Create New Property
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {steps[activeStep].description}
-            </Typography>
-          </Box>
-          <IconButton onClick={handleClose} size="small" sx={{ color: 'text.secondary' }}>
-            <CloseIcon />
+          <Typography variant="h6" fontWeight={600} color="text.primary">
+            Create New Property
+          </Typography>
+          <IconButton onClick={handleClose} size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
+            <CloseIcon fontSize="small" />
           </IconButton>
         </Box>
 
-        <Stepper activeStep={activeStep} alternativeLabel>
+        <Stepper
+          activeStep={activeStep}
+          sx={{
+            '& .MuiStepConnector-line': { borderTopWidth: 1 },
+            '& .MuiStepIcon-root': { width: 20, height: 20, fontSize: '0.75rem' },
+            '& .MuiStepConnector-root': { top: 10 },
+          }}
+        >
           {steps.map((step, index) => (
             <Step key={step.label} completed={index < activeStep}>
               <StepLabel
                 sx={{
                   '& .MuiStepLabel-label': {
+                    fontSize: '0.8125rem',
                     fontWeight: index === activeStep ? 600 : 400,
                     color: index === activeStep ? 'primary.main' : 'text.secondary',
                   },
+                  '& .MuiStepLabel-iconContainer': { pr: 1 },
                 }}
               >
                 {step.label}
@@ -142,8 +145,8 @@ function WizardContent({ onClose }: { onClose: () => void }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          px: 4,
-          py: 3,
+          px: 2.5,
+          py: 1,
           borderTop: '1px solid',
           borderColor: 'divider',
           bgcolor: 'background.paper',
@@ -151,22 +154,24 @@ function WizardContent({ onClose }: { onClose: () => void }) {
       >
         <Button
           variant="outlined"
+          size="small"
           onClick={handleBack}
           disabled={activeStep === 0}
-          startIcon={<ArrowBackIcon />}
+          startIcon={<ArrowBackIcon fontSize="small" />}
           sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
         >
           Back
         </Button>
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="caption" color="text.secondary">
           Step {activeStep + 1} of {steps.length}
         </Typography>
 
         <Button
           variant="contained"
+          size="small"
           onClick={handleNext}
-          endIcon={isLastStep ? <CheckIcon /> : <ArrowForwardIcon />}
+          endIcon={isLastStep ? <CheckIcon fontSize="small" /> : <ArrowForwardIcon fontSize="small" />}
         >
           {isLastStep ? 'Create Property' : 'Next'}
         </Button>
