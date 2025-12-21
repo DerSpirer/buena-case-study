@@ -105,12 +105,14 @@ const PropertyDashboard = () => {
   const handleDeleteConfirm = async () => {
     if (!propertyToDelete) return;
 
+    const deletedPropertyName = propertyToDelete.name;
     setDeleteDialogOpen(false);
     setIsLoading(true);
     try {
       await propertyApi.delete(propertyToDelete.id);
       setPropertyToDelete(null);
       await fetchProperties();
+      showSuccess(`Property "${deletedPropertyName}" deleted successfully!`);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete property';
       setError(message);
