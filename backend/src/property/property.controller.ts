@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Param,
   ParseUUIDPipe,
@@ -11,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PropertyService } from './property.service';
-import { CreatePropertyDto } from './dto';
+import { PropertyDto } from './dto';
 import { Property } from './entities';
 
 @Controller('properties')
@@ -19,8 +20,16 @@ export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
-  create(@Body() dto: CreatePropertyDto): Promise<Property> {
+  create(@Body() dto: PropertyDto): Promise<Property> {
     return this.propertyService.create(dto);
+  }
+
+  @Put(':id')
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: PropertyDto,
+  ): Promise<Property> {
+    return this.propertyService.update(id, dto);
   }
 
   @Get()

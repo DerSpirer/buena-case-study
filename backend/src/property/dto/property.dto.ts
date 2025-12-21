@@ -1,37 +1,38 @@
 import {
   IsString,
   IsNotEmpty,
+  IsIn,
   IsArray,
   ValidateNested,
   ArrayMinSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateUnitDto } from './create-unit.dto';
+import type { ManagementType } from '../entities';
+import { BuildingDto } from './building.dto';
 
-export class CreateBuildingDto {
-  @IsString()
-  @IsNotEmpty()
-  street: string;
-
-  @IsString()
-  @IsNotEmpty()
-  houseNumber: string;
+export class PropertyDto {
+  @IsIn(['WEG', 'MV'])
+  managementType: ManagementType;
 
   @IsString()
   @IsNotEmpty()
-  city: string;
+  name: string;
 
   @IsString()
   @IsNotEmpty()
-  postalCode: string;
+  propertyManager: string;
 
   @IsString()
   @IsNotEmpty()
-  country: string;
+  accountant: string;
+
+  @IsString()
+  @IsNotEmpty()
+  declarationFileName: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
-  @Type(() => CreateUnitDto)
-  units: CreateUnitDto[];
+  @Type(() => BuildingDto)
+  buildings: BuildingDto[];
 }

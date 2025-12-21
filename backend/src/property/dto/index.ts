@@ -1,3 +1,3 @@
-export { CreatePropertyDto } from './create-property.dto';
-export { CreateBuildingDto } from './create-building.dto';
-export { CreateUnitDto } from './create-unit.dto';
+export { PropertyDto } from './property.dto';
+export { BuildingDto } from './building.dto';
+export { UnitDto } from './unit.dto';

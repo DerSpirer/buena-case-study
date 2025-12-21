@@ -7,10 +7,15 @@ import {
   Min,
   Max,
   IsOptional,
+  IsUUID,
 } from 'class-validator';
 import type { UnitType } from '../entities';
 
-export class CreateUnitDto {
+export class UnitDto {
+  @IsUUID()
+  @IsOptional()
+  id?: string;
+
   @IsString()
   @IsNotEmpty()
   unitNumber: string;
