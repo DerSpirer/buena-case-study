@@ -18,7 +18,6 @@ import EmptyBuildingsState from './EmptyBuildingsState';
 import BuildingSelector from './BuildingSelector';
 import UnitTableRow from './UnitTableRow';
 import UnitTableEmptyState from './UnitTableEmptyState';
-import UnitTableFooter from './UnitTableFooter';
 
 const UnitsStep: FC = () => {
   const buildings = useBuildings();
@@ -106,9 +105,6 @@ const UnitsStep: FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
-
-        {/* Quick summary footer */}
-        {selectedBuilding && <UnitTableFooter />}
       </Paper>
     </Box>
   );
