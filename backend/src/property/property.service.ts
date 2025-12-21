@@ -214,7 +214,7 @@ Extract the data and return it as a valid JSON object with the following structu
         {
           "unitNumber": "unit identifier",
           "type": "Apartment" or "Office" or "Garden" or "Parking",
-          "floor": floor number (integer),
+          "floor": floor number (integer, use -1 for basement/underground),
           "entrance": "entrance identifier",
           "size": size in square meters (number),
           "coOwnershipShare": ownership share as decimal between 0 and 1 (e.g., 0.05 for 5%),
@@ -226,10 +226,13 @@ Extract the data and return it as a valid JSON object with the following structu
   ]
 }
 
-IMPORTANT: Only include fields that are explicitly stated in the document.
-- If a field cannot be determined from the document, set it to null
-- For coOwnershipShare, if given as MEA (Miteigentumsanteile), convert to decimal
-- Extract all individual units mentioned with their available details
+IMPORTANT RULES:
+1. Only include fields that are explicitly stated in the document. If a field cannot be determined, set it to null.
+2. For coOwnershipShare, if given as MEA (Miteigentumsanteile) like "110/1000", convert to decimal (0.11).
+3. Extract all individual units mentioned with their available details.
+4. NEVER create a building with null or empty address fields. Every building must have a valid street address.
+5. Units without their own address (e.g., parking, storage, gardens) must be assigned to an existing building based on their described location or access point.
+6. For underground/basement units, use floor: -1.
 
 Return ONLY the JSON object, no additional text or markdown formatting.`;
 
