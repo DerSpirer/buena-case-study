@@ -10,7 +10,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { usePayload, useUpdatePayload } from '../../wizardStore';
-import type { ManagementType } from '../../wizardStore';
+import type { ManagementType } from '../../../../types/Property';
 
 const PropertyDetailsForm: FC = () => {
   const payload = usePayload();

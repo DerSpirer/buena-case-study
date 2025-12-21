@@ -1,43 +1,15 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
+import type {
+  ManagementType,
+  UnitType,
+  CreateUnitPayload,
+  CreateBuildingPayload,
+  CreatePropertyPayload,
+} from '../../types/Property';
 
-// ============================================================================
-// Types matching backend DTOs
-// ============================================================================
-export type ManagementType = 'WEG' | 'MV';
-export type UnitType = 'Apartment' | 'Office' | 'Garden' | 'Parking';
-
-/** Matches backend CreateUnitDto */
-export interface CreateUnitPayload {
-  unitNumber: string;
-  type: UnitType;
-  floor: number;
-  entrance?: string; // Optional field
-  size: number;
-  coOwnershipShare: number;
-  constructionYear: number;
-  rooms: number;
-}
-
-/** Matches backend CreateBuildingDto */
-export interface CreateBuildingPayload {
-  street: string;
-  houseNumber: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  units: CreateUnitPayload[];
-}
-
-/** Matches backend CreatePropertyDto - this is what we send to the API */
-export interface CreatePropertyPayload {
-  managementType: ManagementType | '';
-  name: string;
-  propertyManager: string;
-  accountant: string;
-  declarationFileName: string;
-  buildings: CreateBuildingPayload[];
-}
+// Re-export types for convenience
+export type { ManagementType, UnitType, CreateUnitPayload, CreateBuildingPayload, CreatePropertyPayload };
 
 // ============================================================================
 // Initial/empty values

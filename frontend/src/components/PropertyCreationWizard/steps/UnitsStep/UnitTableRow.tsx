@@ -13,7 +13,7 @@ import {
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useUnit, useUnitActions } from '../../wizardStore';
-import type { CreateUnitPayload, UnitType } from '../../wizardStore';
+import type { CreateUnitPayload, UnitType } from '../../../../types/Property';
 
 const unitTypeOptions: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 

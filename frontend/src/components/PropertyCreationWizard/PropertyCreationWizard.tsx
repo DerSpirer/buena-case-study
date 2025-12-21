@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogContent,
   IconButton,
@@ -16,7 +19,15 @@ import CheckIcon from '@mui/icons-material/Check';
 import GeneralInfoStep from './steps/GeneralInfoStep';
 import BuildingDataStep from './steps/BuildingDataStep';
 import UnitsStep from './steps/UnitsStep';
-import { useActiveStep, useSetActiveStep, useReset, useIsCurrentStepValid } from './wizardStore';
+import {
+  useActiveStep,
+  useSetActiveStep,
+  useReset,
+  useIsCurrentStepValid,
+  usePayload,
+} from './wizardStore';
+import type { ManagementType } from '../../types/Property';
+import { propertyApi } from '../../api/propertyApi';
 
 interface PropertyCreationWizardProps {
   open: boolean;
@@ -34,6 +45,10 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
   const setActiveStep = useSetActiveStep();
   const reset = useReset();
   const isCurrentStepValid = useIsCurrentStepValid();
+  const payload = usePayload();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
@@ -47,9 +62,24 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
     setActiveStep((prev) => prev - 1);
   };
 
-  const handleSubmit = () => {
-    // TODO: Submit formData to API
-    handleClose();
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Ensure managementType is valid before sending
+      const apiPayload = {
+        ...payload,
+        managementType: payload.managementType as ManagementType,
+      };
+      await propertyApi.create(apiPayload);
+      handleClose();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create property';
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -144,9 +174,6 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
       {/* Footer */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
           px: 2.5,
           py: 1,
           borderTop: '1px solid',
@@ -154,30 +181,51 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
           bgcolor: 'background.paper',
         }}
       >
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={handleBack}
-          disabled={activeStep === 0}
-          startIcon={<ArrowBackIcon fontSize="small" />}
-          sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
+        {error && (
+          <Alert severity="error" sx={{ mb: 1 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
         >
-          Back
-        </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleBack}
+            disabled={activeStep === 0 || isSubmitting}
+            startIcon={<ArrowBackIcon fontSize="small" />}
+            sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
+          >
+            Back
+          </Button>
 
-        <Typography variant="caption" color="text.secondary">
-          Step {activeStep + 1} of {steps.length}
-        </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Step {activeStep + 1} of {steps.length}
+          </Typography>
 
-        <Button
-          variant="contained"
-          size="small"
-          onClick={handleNext}
-          disabled={!isCurrentStepValid}
-          endIcon={isLastStep ? <CheckIcon fontSize="small" /> : <ArrowForwardIcon fontSize="small" />}
-        >
-          {isLastStep ? 'Create Property' : 'Next'}
-        </Button>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleNext}
+            disabled={!isCurrentStepValid || isSubmitting}
+            endIcon={
+              isSubmitting ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : isLastStep ? (
+                <CheckIcon fontSize="small" />
+              ) : (
+                <ArrowForwardIcon fontSize="small" />
+              )
+            }
+          >
+            {isLastStep ? (isSubmitting ? 'Creating...' : 'Create Property') : 'Next'}
+          </Button>
+        </Box>
       </Box>
     </>
   );
