@@ -16,7 +16,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import GeneralInfoStep from './steps/GeneralInfoStep';
 import BuildingDataStep from './steps/BuildingDataStep';
 import UnitsStep from './steps/UnitsStep';
-import { useActiveStep, useSetActiveStep, useReset } from './wizardStore';
+import { useActiveStep, useSetActiveStep, useReset, useIsCurrentStepValid } from './wizardStore';
 
 interface PropertyCreationWizardProps {
   open: boolean;
@@ -33,6 +33,7 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
   const activeStep = useActiveStep();
   const setActiveStep = useSetActiveStep();
   const reset = useReset();
+  const isCurrentStepValid = useIsCurrentStepValid();
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
@@ -172,6 +173,7 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
           variant="contained"
           size="small"
           onClick={handleNext}
+          disabled={!isCurrentStepValid}
           endIcon={isLastStep ? <CheckIcon fontSize="small" /> : <ArrowForwardIcon fontSize="small" />}
         >
           {isLastStep ? 'Create Property' : 'Next'}

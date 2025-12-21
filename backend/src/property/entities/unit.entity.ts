@@ -24,8 +24,8 @@ export class Unit {
   @Column({ type: 'int' })
   floor: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  entrance: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  entrance: string | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   size: number;

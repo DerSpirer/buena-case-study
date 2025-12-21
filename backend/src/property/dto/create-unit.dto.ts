@@ -6,6 +6,7 @@ import {
   IsIn,
   Min,
   Max,
+  IsOptional,
 } from 'class-validator';
 import type { UnitType } from '../entities';
 
@@ -21,8 +22,8 @@ export class CreateUnitDto {
   floor: number;
 
   @IsString()
-  @IsNotEmpty()
-  entrance: string;
+  @IsOptional()
+  entrance?: string;
 
   @IsNumber()
   @Min(0)

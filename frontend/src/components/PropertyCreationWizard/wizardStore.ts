@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
 // ============================================================================
-// Types matching backend DTOs exactly
+// Types matching backend DTOs
 // ============================================================================
 export type ManagementType = 'WEG' | 'MV';
 export type UnitType = 'Apartment' | 'Office' | 'Garden' | 'Parking';
@@ -12,7 +12,7 @@ export interface CreateUnitPayload {
   unitNumber: string;
   type: UnitType;
   floor: number;
-  entrance: string;
+  entrance?: string; // Optional field
   size: number;
   coOwnershipShare: number;
   constructionYear: number;
@@ -56,7 +56,7 @@ const createEmptyUnit = (): CreateUnitPayload => ({
   unitNumber: '',
   type: 'Apartment',
   floor: 0,
-  entrance: '',
+  entrance: undefined,
   size: 0,
   coOwnershipShare: 0,
   constructionYear: new Date().getFullYear(),
@@ -269,7 +269,7 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
 }));
 
 // ============================================================================
-// Selector hooks for fine-grained subscriptions
+// Selector hooks
 // ============================================================================
 
 // Navigation
@@ -325,3 +325,90 @@ export const useUnitActions = () =>
       deleteUnit: state.deleteUnit,
     }))
   );
+
+// ============================================================================
+// Validation functions
+// ============================================================================
+
+export const isStep1Valid = (payload: CreatePropertyPayload): boolean => {
+  return (
+    (payload.managementType === 'WEG' || payload.managementType === 'MV') &&
+    payload.name.trim().length > 0 &&
+    payload.propertyManager.trim().length > 0 &&
+    payload.accountant.trim().length > 0 &&
+    payload.declarationFileName.trim().length > 0
+  );
+};
+
+const isUnitValid = (unit: CreateUnitPayload): boolean => {
+  const currentYear = new Date().getFullYear();
+  const validTypes: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
+
+  return (
+    unit.unitNumber.trim().length > 0 &&
+    validTypes.includes(unit.type) &&
+    Number.isInteger(unit.floor) &&
+    unit.size >= 0 &&
+    unit.coOwnershipShare >= 0 &&
+    unit.coOwnershipShare <= 1 &&
+    Number.isInteger(unit.constructionYear) &&
+    unit.constructionYear >= 1000 &&
+    unit.constructionYear <= currentYear &&
+    Number.isInteger(unit.rooms) &&
+    unit.rooms >= 0
+  );
+};
+
+const isBuildingAddressValid = (building: CreateBuildingPayload): boolean => {
+  return (
+    building.street.trim().length > 0 &&
+    building.houseNumber.trim().length > 0 &&
+    building.city.trim().length > 0 &&
+    building.postalCode.trim().length > 0 &&
+    building.country.trim().length > 0
+  );
+};
+
+const isBuildingValid = (building: CreateBuildingPayload): boolean => {
+  return (
+    isBuildingAddressValid(building) &&
+    building.units.length >= 1 &&
+    building.units.every(isUnitValid)
+  );
+};
+
+export const isStep2Valid = (payload: CreatePropertyPayload): boolean => {
+  if (payload.buildings.length === 0) return false;
+
+  return payload.buildings.every(isBuildingAddressValid);
+};
+
+export const isStep3Valid = (payload: CreatePropertyPayload): boolean => {
+  if (payload.buildings.length === 0) return false;
+
+  return payload.buildings.every(
+    (b) => b.units.length >= 1 && b.units.every(isUnitValid)
+  );
+};
+
+export const isPayloadValid = (payload: CreatePropertyPayload): boolean => {
+  return (
+    isStep1Valid(payload) &&
+    payload.buildings.length >= 1 &&
+    payload.buildings.every(isBuildingValid)
+  );
+};
+
+export const useIsCurrentStepValid = () =>
+  useWizardStore((state) => {
+    switch (state.activeStep) {
+      case 0:
+        return isStep1Valid(state.payload);
+      case 1:
+        return isStep2Valid(state.payload);
+      case 2:
+        return isStep3Valid(state.payload);
+      default:
+        return false;
+    }
+  });
