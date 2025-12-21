@@ -104,46 +104,67 @@ const PropertyDashboard = () => {
         </Box>
 
         {/* Table */}
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Unique Number</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {isLoading || isLoadingProperty ? (
+        <Box sx={{ position: 'relative' }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              opacity: isLoading || isLoadingProperty ? 0.5 : 1,
+              pointerEvents: isLoading || isLoadingProperty ? 'none' : 'auto',
+              transition: 'opacity 0.2s ease',
+            }}
+          >
+            <Table>
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
-                    <CircularProgress size={32} />
-                  </TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Unique Number</TableCell>
                 </TableRow>
-              ) : error ? (
-                <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
-                    <Typography color="error">{error}</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : properties.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
-                    <Typography color="text.secondary">No properties yet. Create your first property!</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                properties.map((property) => (
-                  <PropertyTableRow
-                    key={property.id}
-                    property={property}
-                    onClick={handlePropertyClick}
-                  />
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {error ? (
+                  <TableRow>
+                    <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                      <Typography color="error">{error}</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : properties.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                      <Typography color="text.secondary">No properties yet. Create your first property!</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  properties.map((property) => (
+                    <PropertyTableRow
+                      key={property.id}
+                      property={property}
+                      onClick={handlePropertyClick}
+                    />
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Loading overlay */}
+          {(isLoading || isLoadingProperty) && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CircularProgress size={40} />
+            </Box>
+          )}
+        </Box>
       </Container>
 
       {/* Property Creation Wizard */}
