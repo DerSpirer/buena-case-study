@@ -26,6 +26,8 @@ import StatCard from './StatCard';
 import PropertyCreationWizard from '../PropertyCreationWizard';
 import { useLoadProperty, useReset } from '../PropertyCreationWizard/wizardStore';
 
+const SITE_TITLE = 'Buena Case Study - Tom Spirer';
+
 const PropertyDashboard = () => {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [properties, setProperties] = useState<PropertySummary[]>([]);
@@ -114,23 +116,41 @@ const PropertyDashboard = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', background: 'background.gradient', py: 6, px: 4 }}>
-      <Container>
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 5 }}>
-          <Box>
-            <Typography variant="h3" color="text.primary" gutterBottom>
-              Properties
-            </Typography>
-            <Typography color="text.secondary">
-              Manage your property portfolio
-            </Typography>
-          </Box>
+    <Box sx={{ minHeight: '100vh', background: 'background.gradient' }}>
+      {/* Site Header */}
+      <Box
+        sx={{
+          py: 2,
+          px: 4,
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+        }}
+      >
+        <Container>
+          <Typography variant="h6" fontWeight={600} color="text.primary">
+            {SITE_TITLE}
+          </Typography>
+        </Container>
+      </Box>
 
-          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleCreateProperty}>
-            Create Property
-          </Button>
-        </Box>
+      <Box sx={{ py: 6, px: 4 }}>
+        <Container>
+          {/* Page Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 5 }}>
+            <Box>
+              <Typography variant="h3" color="text.primary" gutterBottom>
+                Properties
+              </Typography>
+              <Typography color="text.secondary">
+                Manage your property portfolio
+              </Typography>
+            </Box>
+
+            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleCreateProperty}>
+              Create Property
+            </Button>
+          </Box>
 
         {/* Stats Row */}
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3, mb: 5 }}>
@@ -204,6 +224,7 @@ const PropertyDashboard = () => {
           )}
         </Box>
       </Container>
+      </Box>
 
       {/* Property Creation Wizard */}
       <PropertyCreationWizard open={wizardOpen} onClose={handleCloseWizard} onSuccess={handleWizardSuccess} />
