@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Paper,
   Table,
@@ -13,13 +14,35 @@ import {
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { mockProperties } from '../../data/mockProperties';
+import { propertyApi } from '../../api/propertyApi';
+import type { Property } from '../../types/Property';
 import PropertyTableRow from './PropertyTableRow';
 import StatCard from './StatCard';
 import PropertyCreationWizard from '../PropertyCreationWizard';
 
 const PropertyDashboard = () => {
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProperties = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await propertyApi.getAll();
+      setProperties(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch properties';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   const handleCreateProperty = () => {
     setWizardOpen(true);
@@ -27,6 +50,11 @@ const PropertyDashboard = () => {
 
   const handleCloseWizard = () => {
     setWizardOpen(false);
+  };
+
+  const handleWizardSuccess = () => {
+    setWizardOpen(false);
+    fetchProperties();
   };
 
   return (
@@ -50,9 +78,9 @@ const PropertyDashboard = () => {
 
         {/* Stats Row */}
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3, mb: 5 }}>
-          <StatCard label="Total Properties" value={mockProperties.length} variant="primary" />
-          <StatCard label="WEG Properties" value={mockProperties.filter((p) => p.type === 'WEG').length} variant="primary" />
-          <StatCard label="MV Properties" value={mockProperties.filter((p) => p.type === 'MV').length} variant="secondary" />
+          <StatCard label="Total Properties" value={properties.length} variant="primary" />
+          <StatCard label="WEG Properties" value={properties.filter((p) => p.managementType === 'WEG').length} variant="primary" />
+          <StatCard label="MV Properties" value={properties.filter((p) => p.managementType === 'MV').length} variant="secondary" />
         </Box>
 
         {/* Table */}
@@ -60,23 +88,42 @@ const PropertyDashboard = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Property Number</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Type</TableCell>
-                <TableCell>Address</TableCell>
+                <TableCell>Unique Number</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {mockProperties.map((property) => (
-                <PropertyTableRow key={property.id} property={property} />
-              ))}
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={32} />
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <Typography color="error">{error}</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : properties.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">No properties yet. Create your first property!</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                properties.map((property) => (
+                  <PropertyTableRow key={property.id} property={property} />
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Container>
 
       {/* Property Creation Wizard */}
-      <PropertyCreationWizard open={wizardOpen} onClose={handleCloseWizard} />
+      <PropertyCreationWizard open={wizardOpen} onClose={handleCloseWizard} onSuccess={handleWizardSuccess} />
     </Box>
   );
 };

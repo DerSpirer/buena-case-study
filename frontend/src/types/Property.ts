@@ -47,11 +47,13 @@ export interface CreatePropertyPayload {
 
 export interface Property {
   id: string;
+  managementType: ManagementType;
   name: string;
-  type: ManagementType;
-  uniqueNumber: string;
-  address?: string;
+  propertyManager: string;
+  accountant: string;
+  declarationFileName: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============================================================================

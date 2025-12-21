@@ -7,7 +7,7 @@ interface PropertyTableRowProps {
   property: Property;
 }
 
-const PropertyTypeChip = ({ type }: { type: Property['type'] }) => {
+const PropertyTypeChip = ({ type }: { type: Property['managementType'] }) => {
   const isWEG = type === 'WEG';
 
   return (
@@ -26,22 +26,20 @@ const PropertyTypeChip = ({ type }: { type: Property['type'] }) => {
 };
 
 const PropertyTableRow = ({ property }: PropertyTableRowProps) => {
+  // Use first 8 chars of UUID as display ID
+  const shortId = property.id.slice(0, 8).toUpperCase();
+
   return (
     <TableRow>
-      <TableCell>
-        <Typography variant="mono" color="grey.600">
-          {property.uniqueNumber}
-        </Typography>
-      </TableCell>
       <TableCell>
         <Typography variant="bodyEmphasis">{property.name}</Typography>
       </TableCell>
       <TableCell>
-        <PropertyTypeChip type={property.type} />
+        <PropertyTypeChip type={property.managementType} />
       </TableCell>
       <TableCell>
-        <Typography variant="body2" color="text.secondary">
-          {property.address}
+        <Typography variant="mono" color="text.secondary">
+          {shortId}
         </Typography>
       </TableCell>
     </TableRow>

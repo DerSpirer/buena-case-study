@@ -32,6 +32,7 @@ import { propertyApi } from '../../api/propertyApi';
 interface PropertyCreationWizardProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 const steps = [
@@ -40,7 +41,7 @@ const steps = [
   { label: 'Units', description: 'Apartments, offices & more' },
 ];
 
-const WizardContent = ({ onClose }: { onClose: () => void }) => {
+const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?: () => void }) => {
   const activeStep = useActiveStep();
   const setActiveStep = useSetActiveStep();
   const reset = useReset();
@@ -73,7 +74,7 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
         managementType: payload.managementType as ManagementType,
       };
       await propertyApi.create(apiPayload);
-      handleClose();
+      handleSuccess();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create property';
       setError(message);
@@ -85,6 +86,11 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
   const handleClose = () => {
     reset();
     onClose();
+  };
+
+  const handleSuccess = () => {
+    reset();
+    onSuccess?.();
   };
 
   const renderStepContent = () => {
@@ -231,7 +237,7 @@ const WizardContent = ({ onClose }: { onClose: () => void }) => {
   );
 }
 
-export default function PropertyCreationWizard({ open, onClose }: PropertyCreationWizardProps) {
+export default function PropertyCreationWizard({ open, onClose, onSuccess }: PropertyCreationWizardProps) {
   return (
     <Dialog
       open={open}
@@ -250,7 +256,7 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
         },
       }}
     >
-      <WizardContent onClose={onClose} />
+      <WizardContent onClose={onClose} onSuccess={onSuccess} />
     </Dialog>
   );
 }
