@@ -14,7 +14,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useBuilding, useBuildingActions } from '../../wizardStore';
-import type { CreateBuildingPayload } from '../../../../types/Property';
+import type { BuildingPayload } from '../../../../types/Property';
 
 interface BuildingCardProps {
   index: number;
@@ -26,7 +26,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const handleUpdateField = useCallback(
-    (field: keyof CreateBuildingPayload, value: string) => {
+    (field: keyof BuildingPayload, value: string) => {
       updateBuilding(index, field, value);
     },
     [updateBuilding, index]
@@ -122,7 +122,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '2fr 1fr' }, gap: 2 }}>
             <TextField
               label="Street"
-              value={building.street}
+              value={building.street ?? ''}
               onChange={(e) => handleUpdateField('street', e.target.value)}
               placeholder="e.g., Musterstraße"
               fullWidth
@@ -130,7 +130,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             />
             <TextField
               label="House Number"
-              value={building.houseNumber}
+              value={building.houseNumber ?? ''}
               onChange={(e) => handleUpdateField('houseNumber', e.target.value)}
               placeholder="e.g., 42a"
               fullWidth
@@ -142,7 +142,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 2fr' }, gap: 2 }}>
             <TextField
               label="Postal Code"
-              value={building.postalCode}
+              value={building.postalCode ?? ''}
               onChange={(e) => handleUpdateField('postalCode', e.target.value)}
               placeholder="e.g., 10115"
               fullWidth
@@ -150,7 +150,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             />
             <TextField
               label="City"
-              value={building.city}
+              value={building.city ?? ''}
               onChange={(e) => handleUpdateField('city', e.target.value)}
               placeholder="e.g., Berlin"
               fullWidth
@@ -162,7 +162,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
             <TextField
               label="Country"
-              value={building.country}
+              value={building.country ?? ''}
               onChange={(e) => handleUpdateField('country', e.target.value)}
               placeholder="e.g., Germany"
               fullWidth

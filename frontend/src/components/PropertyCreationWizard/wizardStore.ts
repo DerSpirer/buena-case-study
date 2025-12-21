@@ -370,33 +370,117 @@ export const isStep1Valid = (payload: PropertyPayload): boolean => {
   );
 };
 
+export const getStep1ValidationErrors = (payload: PropertyPayload): string[] => {
+  const errors: string[] = [];
+  if (payload.managementType !== 'WEG' && payload.managementType !== 'MV') {
+    errors.push('Management Type');
+  }
+  if (!payload.name.trim()) {
+    errors.push('Property Name');
+  }
+  if (!payload.propertyManager.trim()) {
+    errors.push('Property Manager');
+  }
+  if (!payload.accountant.trim()) {
+    errors.push('Accountant');
+  }
+  if (!payload.declarationFileName.trim()) {
+    errors.push('Declaration of Division');
+  }
+  return errors;
+};
+
 const isUnitValid = (unit: UnitPayload): boolean => {
   const currentYear = new Date().getFullYear();
   const validTypes: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 
+  const floor = Number(unit.floor);
+  const size = Number(unit.size);
+  const coOwnershipShare = Number(unit.coOwnershipShare);
+  const constructionYear = Number(unit.constructionYear);
+  const rooms = Number(unit.rooms);
+
   return (
     unit.unitNumber.trim().length > 0 &&
     validTypes.includes(unit.type) &&
-    Number.isInteger(unit.floor) &&
-    unit.size > 0 &&
-    unit.coOwnershipShare > 0 &&
-    unit.coOwnershipShare <= 1 &&
-    Number.isInteger(unit.constructionYear) &&
-    unit.constructionYear >= 1000 &&
-    unit.constructionYear <= currentYear &&
-    Number.isInteger(unit.rooms) &&
-    unit.rooms >= 0
+    Number.isInteger(floor) &&
+    size > 0 &&
+    coOwnershipShare > 0 &&
+    coOwnershipShare <= 1 &&
+    Number.isInteger(constructionYear) &&
+    constructionYear >= 1000 &&
+    constructionYear <= currentYear &&
+    Number.isInteger(rooms) &&
+    rooms >= 0
   );
+};
+
+const getUnitValidationErrors = (unit: UnitPayload, unitIndex: number): string[] => {
+  const currentYear = new Date().getFullYear();
+  const validTypes: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
+  const errors: string[] = [];
+  const unitLabel = unit.unitNumber.trim() || `Unit ${unitIndex + 1}`;
+
+  const floor = Number(unit.floor);
+  const size = Number(unit.size);
+  const coOwnershipShare = Number(unit.coOwnershipShare);
+  const constructionYear = Number(unit.constructionYear);
+  const rooms = Number(unit.rooms);
+
+  if (!unit.unitNumber.trim()) {
+    errors.push(`${unitLabel}: Unit Number`);
+  }
+  if (!validTypes.includes(unit.type)) {
+    errors.push(`${unitLabel}: Type`);
+  }
+  if (!Number.isInteger(floor)) {
+    errors.push(`${unitLabel}: Floor`);
+  }
+  if (size <= 0) {
+    errors.push(`${unitLabel}: Size`);
+  }
+  if (coOwnershipShare <= 0 || coOwnershipShare > 1) {
+    errors.push(`${unitLabel}: Co-Ownership Share`);
+  }
+  if (!Number.isInteger(constructionYear) || constructionYear < 1000 || constructionYear > currentYear) {
+    errors.push(`${unitLabel}: Construction Year`);
+  }
+  if (!Number.isInteger(rooms) || rooms < 0) {
+    errors.push(`${unitLabel}: Rooms`);
+  }
+  return errors;
 };
 
 const isBuildingAddressValid = (building: BuildingPayload): boolean => {
   return (
-    building.street.trim().length > 0 &&
-    building.houseNumber.trim().length > 0 &&
-    building.city.trim().length > 0 &&
-    building.postalCode.trim().length > 0 &&
-    building.country.trim().length > 0
+    (building.street ?? '').trim().length > 0 &&
+    (building.houseNumber ?? '').trim().length > 0 &&
+    (building.city ?? '').trim().length > 0 &&
+    (building.postalCode ?? '').trim().length > 0 &&
+    (building.country ?? '').trim().length > 0
   );
+};
+
+const getBuildingAddressErrors = (building: BuildingPayload, buildingIndex: number): string[] => {
+  const errors: string[] = [];
+  const buildingLabel = `Building ${buildingIndex + 1}`;
+
+  if (!(building.street ?? '').trim()) {
+    errors.push(`${buildingLabel}: Street`);
+  }
+  if (!(building.houseNumber ?? '').trim()) {
+    errors.push(`${buildingLabel}: House Number`);
+  }
+  if (!(building.city ?? '').trim()) {
+    errors.push(`${buildingLabel}: City`);
+  }
+  if (!(building.postalCode ?? '').trim()) {
+    errors.push(`${buildingLabel}: Postal Code`);
+  }
+  if (!(building.country ?? '').trim()) {
+    errors.push(`${buildingLabel}: Country`);
+  }
+  return errors;
 };
 
 const isBuildingValid = (building: BuildingPayload): boolean => {
@@ -413,12 +497,48 @@ export const isStep2Valid = (payload: PropertyPayload): boolean => {
   return payload.buildings.every(isBuildingAddressValid);
 };
 
+export const getStep2ValidationErrors = (payload: PropertyPayload): string[] => {
+  const errors: string[] = [];
+  if (payload.buildings.length === 0) {
+    errors.push('At least one building is required');
+    return errors;
+  }
+
+  payload.buildings.forEach((building, index) => {
+    errors.push(...getBuildingAddressErrors(building, index));
+  });
+
+  return errors;
+};
+
 export const isStep3Valid = (payload: PropertyPayload): boolean => {
   if (payload.buildings.length === 0) return false;
 
   return payload.buildings.every(
     (b) => b.units.length >= 1 && b.units.every(isUnitValid)
   );
+};
+
+export const getStep3ValidationErrors = (payload: PropertyPayload): string[] => {
+  const errors: string[] = [];
+  if (payload.buildings.length === 0) {
+    errors.push('At least one building is required');
+    return errors;
+  }
+
+  payload.buildings.forEach((building, buildingIndex) => {
+    const buildingLabel = `Building ${buildingIndex + 1}`;
+    if (building.units.length === 0) {
+      errors.push(`${buildingLabel}: At least one unit is required`);
+    } else {
+      building.units.forEach((unit, unitIndex) => {
+        const unitErrors = getUnitValidationErrors(unit, unitIndex);
+        errors.push(...unitErrors.map(e => `${buildingLabel} - ${e}`));
+      });
+    }
+  });
+
+  return errors;
 };
 
 export const isPayloadValid = (payload: PropertyPayload): boolean => {
@@ -442,3 +562,19 @@ export const useIsCurrentStepValid = () =>
         return false;
     }
   });
+
+export const useCurrentStepValidationErrors = () =>
+  useWizardStore(
+    useShallow((state) => {
+      switch (state.activeStep) {
+        case 0:
+          return getStep1ValidationErrors(state.payload);
+        case 1:
+          return getStep2ValidationErrors(state.payload);
+        case 2:
+          return getStep3ValidationErrors(state.payload);
+        default:
+          return [];
+      }
+    })
+  );

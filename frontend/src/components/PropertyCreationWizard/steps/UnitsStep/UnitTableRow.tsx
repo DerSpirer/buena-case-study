@@ -65,7 +65,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
     >
       <TableCell sx={{ py: 0.75 }}>
         <TextField
-          value={unit.unitNumber}
+          value={unit.unitNumber ?? ''}
           onChange={(e) => handleUpdateField('unitNumber', e.target.value)}
           placeholder="A101"
           size="small"
@@ -78,7 +78,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           select
-          value={unit.type}
+          value={unit.type ?? 'Apartment'}
           onChange={(e) => handleUpdateField('type', e.target.value as UnitType)}
           size="small"
           variant="standard"
@@ -96,7 +96,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.floor}
+          value={unit.floor ?? 0}
           onChange={(e) => handleNumberChange('floor', e.target.value)}
           placeholder="0"
           size="small"
@@ -111,7 +111,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       </TableCell>
       <TableCell sx={{ py: 0.75 }}>
         <TextField
-          value={unit.entrance}
+          value={unit.entrance ?? ''}
           onChange={(e) => handleUpdateField('entrance', e.target.value)}
           placeholder="A"
           size="small"
@@ -124,7 +124,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.size || ''}
+          value={unit.size ?? ''}
           onChange={(e) => handleNumberChange('size', e.target.value)}
           placeholder="0"
           size="small"
@@ -140,7 +140,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.rooms}
+          value={unit.rooms ?? 0}
           onChange={(e) => handleNumberChange('rooms', e.target.value)}
           placeholder="0"
           size="small"
@@ -156,7 +156,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.coOwnershipShare || ''}
+          value={unit.coOwnershipShare ?? ''}
           onChange={(e) => handleNumberChange('coOwnershipShare', e.target.value)}
           placeholder="0.00"
           size="small"
@@ -172,7 +172,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.constructionYear || ''}
+          value={unit.constructionYear ?? ''}
           onChange={(e) => handleNumberChange('constructionYear', e.target.value)}
           placeholder="2024"
           size="small"

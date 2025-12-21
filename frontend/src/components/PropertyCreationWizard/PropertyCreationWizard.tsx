@@ -10,6 +10,7 @@ import {
   Step,
   StepLabel,
   Stepper,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -24,6 +25,7 @@ import {
   useSetActiveStep,
   useReset,
   useIsCurrentStepValid,
+  useCurrentStepValidationErrors,
   usePayload,
   useEditingPropertyId,
   useIsEditMode,
@@ -48,6 +50,7 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
   const setActiveStep = useSetActiveStep();
   const reset = useReset();
   const isCurrentStepValid = useIsCurrentStepValid();
+  const validationErrors = useCurrentStepValidationErrors();
   const payload = usePayload();
   const editingPropertyId = useEditingPropertyId();
   const isEditMode = useIsEditMode();
@@ -232,23 +235,49 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
             Step {activeStep + 1} of {steps.length}
           </Typography>
 
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleNext}
-            disabled={!isCurrentStepValid || isSubmitting}
-            endIcon={
-              isSubmitting ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : isLastStep ? (
-                <CheckIcon fontSize="small" />
-              ) : (
-                <ArrowForwardIcon fontSize="small" />
-              )
+          <Tooltip
+            title={
+              !isCurrentStepValid && validationErrors.length > 0 ? (
+                <Box sx={{ p: 0.5 }}>
+                  <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>
+                    Missing required fields:
+                  </Typography>
+                  {validationErrors.slice(0, 5).map((error, index) => (
+                    <Typography key={index} variant="caption" sx={{ display: 'block' }}>
+                      • {error}
+                    </Typography>
+                  ))}
+                  {validationErrors.length > 5 && (
+                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
+                      ...and {validationErrors.length - 5} more
+                    </Typography>
+                  )}
+                </Box>
+              ) : ''
             }
+            placement="top"
+            arrow
           >
-            {isLastStep ? submitButtonText : 'Next'}
-          </Button>
+            <span>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleNext}
+                disabled={!isCurrentStepValid || isSubmitting}
+                endIcon={
+                  isSubmitting ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : isLastStep ? (
+                    <CheckIcon fontSize="small" />
+                  ) : (
+                    <ArrowForwardIcon fontSize="small" />
+                  )
+                }
+              >
+                {isLastStep ? submitButtonText : 'Next'}
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
       </Box>
     </>
