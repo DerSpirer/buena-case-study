@@ -13,7 +13,7 @@ import {
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useUnit, useUnitActions } from '../../wizardStore';
-import type { CreateUnitData, UnitType } from '../../wizardStore';
+import type { CreateUnitPayload, UnitType } from '../../wizardStore';
 
 const unitTypeOptions: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 
@@ -27,7 +27,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
   const { updateUnit, duplicateUnit, deleteUnit } = useUnitActions();
 
   const handleUpdateField = useCallback(
-    (field: keyof CreateUnitData, value: string | number) => {
+    (field: keyof CreateUnitPayload, value: string | number) => {
       updateUnit(buildingIndex, unitIndex, field, value as never);
     },
     [updateUnit, buildingIndex, unitIndex]
@@ -41,7 +41,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
     deleteUnit(buildingIndex, unitIndex);
   }, [deleteUnit, buildingIndex, unitIndex]);
 
-  const handleNumberChange = (field: keyof CreateUnitData, value: string) => {
+  const handleNumberChange = (field: keyof CreateUnitPayload, value: string) => {
     const numValue = value === '' ? 0 : Number(value);
     handleUpdateField(field, numValue);
   };

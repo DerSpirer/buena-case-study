@@ -14,7 +14,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useBuilding, useBuildingActions } from '../../wizardStore';
-import type { CreateBuildingData } from '../../wizardStore';
+import type { CreateBuildingPayload } from '../../wizardStore';
 
 interface BuildingCardProps {
   index: number;
@@ -26,7 +26,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const handleUpdateField = useCallback(
-    (field: keyof CreateBuildingData, value: string) => {
+    (field: keyof CreateBuildingPayload, value: string) => {
       updateBuilding(index, field, value);
     },
     [updateBuilding, index]

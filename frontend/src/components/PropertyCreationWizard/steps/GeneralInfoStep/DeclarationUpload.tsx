@@ -15,13 +15,13 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { useUpdateGeneralInfo } from '../../wizardStore';
+import { useUpdatePayload } from '../../wizardStore';
 import { propertyApi } from '../../../../api/propertyApi';
 
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 const DeclarationUpload: FC = () => {
-  const updateGeneralInfo = useUpdateGeneralInfo();
+  const updatePayload = useUpdatePayload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -30,9 +30,9 @@ const DeclarationUpload: FC = () => {
 
   const updateFileName = useCallback(
     (fileName: string) => {
-      updateGeneralInfo('declarationFileName', fileName);
+      updatePayload('declarationFileName', fileName);
     },
-    [updateGeneralInfo]
+    [updatePayload]
   );
 
   const handleFileChange = async (file: File | null) => {

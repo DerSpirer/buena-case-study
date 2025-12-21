@@ -1,11 +1,14 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 
-// Types matching backend DTOs
+// ============================================================================
+// Types matching backend DTOs exactly
+// ============================================================================
 export type ManagementType = 'WEG' | 'MV';
 export type UnitType = 'Apartment' | 'Office' | 'Garden' | 'Parking';
 
-export interface CreateUnitData {
+/** Matches backend CreateUnitDto */
+export interface CreateUnitPayload {
   unitNumber: string;
   type: UnitType;
   floor: number;
@@ -16,37 +19,40 @@ export interface CreateUnitData {
   rooms: number;
 }
 
-export interface CreateBuildingData {
+/** Matches backend CreateBuildingDto */
+export interface CreateBuildingPayload {
   street: string;
   houseNumber: string;
   city: string;
   postalCode: string;
   country: string;
-  units: CreateUnitData[];
+  units: CreateUnitPayload[];
 }
 
-export interface GeneralInfoData {
+/** Matches backend CreatePropertyDto - this is what we send to the API */
+export interface CreatePropertyPayload {
   managementType: ManagementType | '';
   name: string;
   propertyManager: string;
   accountant: string;
   declarationFileName: string;
+  buildings: CreateBuildingPayload[];
 }
 
-// The full property data for API submission
-export interface CreatePropertyData extends GeneralInfoData {
-  buildings: CreateBuildingData[];
-}
+// ============================================================================
+// Initial/empty values
+// ============================================================================
 
-const initialGeneralInfo: GeneralInfoData = {
+const createEmptyPayload = (): CreatePropertyPayload => ({
   managementType: '',
   name: '',
   propertyManager: '',
   accountant: '',
   declarationFileName: '',
-};
+  buildings: [],
+});
 
-const createEmptyUnit = (): CreateUnitData => ({
+const createEmptyUnit = (): CreateUnitPayload => ({
   unitNumber: '',
   type: 'Apartment',
   floor: 0,
@@ -57,7 +63,7 @@ const createEmptyUnit = (): CreateUnitData => ({
   rooms: 0,
 });
 
-const createEmptyBuilding = (): CreateBuildingData => ({
+const createEmptyBuilding = (): CreateBuildingPayload => ({
   street: '',
   houseNumber: '',
   city: '',
@@ -67,16 +73,19 @@ const createEmptyBuilding = (): CreateBuildingData => ({
 });
 
 // Stable empty array reference to avoid creating new arrays in selectors
-const EMPTY_UNITS: CreateUnitData[] = [];
+const EMPTY_UNITS: CreateUnitPayload[] = [];
+
+// ============================================================================
+// Store
+// ============================================================================
 
 interface WizardState {
   // Navigation
   activeStep: number;
   selectedBuildingIndex: number;
 
-  // Form data (separated for fine-grained subscriptions)
-  generalInfo: GeneralInfoData;
-  buildings: CreateBuildingData[];
+  // The payload we're building - matches backend CreatePropertyDto
+  payload: CreatePropertyPayload;
 }
 
 interface WizardActions {
@@ -84,33 +93,36 @@ interface WizardActions {
   setActiveStep: (step: number | ((prev: number) => number)) => void;
   setSelectedBuildingIndex: (index: number | ((prev: number) => number)) => void;
 
-  // General info
-  updateGeneralInfo: <K extends keyof GeneralInfoData>(field: K, value: GeneralInfoData[K]) => void;
+  // Payload updates
+  updatePayload: <K extends keyof CreatePropertyPayload>(
+    field: K,
+    value: CreatePropertyPayload[K]
+  ) => void;
 
   // Buildings
   addBuilding: () => void;
-  updateBuilding: <K extends keyof CreateBuildingData>(
+  updateBuilding: <K extends keyof CreateBuildingPayload>(
     index: number,
     field: K,
-    value: CreateBuildingData[K]
+    value: CreateBuildingPayload[K]
   ) => void;
   deleteBuilding: (index: number) => void;
 
   // Units
   addUnit: (buildingIndex: number) => void;
   addMultipleUnits: (buildingIndex: number, count: number) => void;
-  updateUnit: <K extends keyof CreateUnitData>(
+  updateUnit: <K extends keyof CreateUnitPayload>(
     buildingIndex: number,
     unitIndex: number,
     field: K,
-    value: CreateUnitData[K]
+    value: CreateUnitPayload[K]
   ) => void;
   duplicateUnit: (buildingIndex: number, unitIndex: number) => void;
   deleteUnit: (buildingIndex: number, unitIndex: number) => void;
 
   // Utility
   reset: () => void;
-  getFormData: () => CreatePropertyData;
+  getPayload: () => CreatePropertyPayload;
 }
 
 export type WizardStore = WizardState & WizardActions;
@@ -119,8 +131,7 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
   // Initial state
   activeStep: 0,
   selectedBuildingIndex: 0,
-  generalInfo: initialGeneralInfo,
-  buildings: [],
+  payload: createEmptyPayload(),
 
   // Navigation
   setActiveStep: (step) =>
@@ -130,82 +141,112 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
 
   setSelectedBuildingIndex: (index) =>
     set((state) => ({
-      selectedBuildingIndex: typeof index === 'function' ? index(state.selectedBuildingIndex) : index,
+      selectedBuildingIndex:
+        typeof index === 'function' ? index(state.selectedBuildingIndex) : index,
     })),
 
-  // General info - only updates generalInfo slice
-  updateGeneralInfo: (field, value) =>
+  // Payload updates (for top-level fields like name, managementType, etc.)
+  updatePayload: (field, value) =>
     set((state) => ({
-      generalInfo: { ...state.generalInfo, [field]: value },
+      payload: { ...state.payload, [field]: value },
     })),
 
   // Buildings
   addBuilding: () =>
     set((state) => ({
-      buildings: [...state.buildings, createEmptyBuilding()],
+      payload: {
+        ...state.payload,
+        buildings: [...state.payload.buildings, createEmptyBuilding()],
+      },
     })),
 
   updateBuilding: (index, field, value) =>
     set((state) => ({
-      buildings: state.buildings.map((b, i) => (i === index ? { ...b, [field]: value } : b)),
+      payload: {
+        ...state.payload,
+        buildings: state.payload.buildings.map((b, i) =>
+          i === index ? { ...b, [field]: value } : b
+        ),
+      },
     })),
 
   deleteBuilding: (index) =>
     set((state) => ({
-      buildings: state.buildings.filter((_, i) => i !== index),
-      // Adjust selectedBuildingIndex if needed
+      payload: {
+        ...state.payload,
+        buildings: state.payload.buildings.filter((_, i) => i !== index),
+      },
       selectedBuildingIndex:
-        state.selectedBuildingIndex >= state.buildings.length - 1
-          ? Math.max(0, state.buildings.length - 2)
+        state.selectedBuildingIndex >= state.payload.buildings.length - 1
+          ? Math.max(0, state.payload.buildings.length - 2)
           : state.selectedBuildingIndex,
     })),
 
   // Units
   addUnit: (buildingIndex) =>
     set((state) => ({
-      buildings: state.buildings.map((b, i) =>
-        i === buildingIndex ? { ...b, units: [...b.units, createEmptyUnit()] } : b
-      ),
+      payload: {
+        ...state.payload,
+        buildings: state.payload.buildings.map((b, i) =>
+          i === buildingIndex ? { ...b, units: [...b.units, createEmptyUnit()] } : b
+        ),
+      },
     })),
 
   addMultipleUnits: (buildingIndex, count) =>
     set((state) => ({
-      buildings: state.buildings.map((b, i) =>
-        i === buildingIndex
-          ? { ...b, units: [...b.units, ...Array.from({ length: count }, createEmptyUnit)] }
-          : b
-      ),
+      payload: {
+        ...state.payload,
+        buildings: state.payload.buildings.map((b, i) =>
+          i === buildingIndex
+            ? { ...b, units: [...b.units, ...Array.from({ length: count }, createEmptyUnit)] }
+            : b
+        ),
+      },
     })),
 
   updateUnit: (buildingIndex, unitIndex, field, value) =>
     set((state) => ({
-      buildings: state.buildings.map((b, bIdx) =>
-        bIdx === buildingIndex
-          ? {
-              ...b,
-              units: b.units.map((u, uIdx) => (uIdx === unitIndex ? { ...u, [field]: value } : u)),
-            }
-          : b
-      ),
+      payload: {
+        ...state.payload,
+        buildings: state.payload.buildings.map((b, bIdx) =>
+          bIdx === buildingIndex
+            ? {
+                ...b,
+                units: b.units.map((u, uIdx) =>
+                  uIdx === unitIndex ? { ...u, [field]: value } : u
+                ),
+              }
+            : b
+        ),
+      },
     })),
 
   duplicateUnit: (buildingIndex, unitIndex) =>
     set((state) => {
-      const unit = state.buildings[buildingIndex]?.units[unitIndex];
+      const unit = state.payload.buildings[buildingIndex]?.units[unitIndex];
       if (!unit) return state;
 
       return {
-        buildings: state.buildings.map((b, i) =>
-          i === buildingIndex ? { ...b, units: [...b.units, { ...unit, unitNumber: '' }] } : b
-        ),
+        payload: {
+          ...state.payload,
+          buildings: state.payload.buildings.map((b, i) =>
+            i === buildingIndex ? { ...b, units: [...b.units, { ...unit, unitNumber: '' }] } : b
+          ),
+        },
       };
     }),
 
   deleteUnit: (buildingIndex, unitIndex) =>
     set((state) => ({
-      buildings: state.buildings.map((b, bIdx) =>
-        bIdx === buildingIndex ? { ...b, units: b.units.filter((_, uIdx) => uIdx !== unitIndex) } : b
-      ),
+      payload: {
+        ...state.payload,
+        buildings: state.payload.buildings.map((b, bIdx) =>
+          bIdx === buildingIndex
+            ? { ...b, units: b.units.filter((_, uIdx) => uIdx !== unitIndex) }
+            : b
+        ),
+      },
     })),
 
   // Utility
@@ -213,44 +254,47 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
     set({
       activeStep: 0,
       selectedBuildingIndex: 0,
-      generalInfo: initialGeneralInfo,
-      buildings: [],
+      payload: createEmptyPayload(),
     }),
 
-  // Aggregate all data for API submission
-  getFormData: () => {
-    const state = get();
-    return {
-      ...state.generalInfo,
-      buildings: state.buildings,
-    };
-  },
+  // Returns the payload object ready to send to the API
+  getPayload: () => get().payload,
 }));
 
+// ============================================================================
 // Selector hooks for fine-grained subscriptions
-// These prevent unnecessary re-renders by subscribing to specific slices
+// ============================================================================
 
+// Navigation
 export const useActiveStep = () => useWizardStore((state) => state.activeStep);
 export const useSetActiveStep = () => useWizardStore((state) => state.setActiveStep);
+export const useSelectedBuildingIndex = () =>
+  useWizardStore((state) => state.selectedBuildingIndex);
+export const useSetSelectedBuildingIndex = () =>
+  useWizardStore((state) => state.setSelectedBuildingIndex);
 
-export const useSelectedBuildingIndex = () => useWizardStore((state) => state.selectedBuildingIndex);
-export const useSetSelectedBuildingIndex = () => useWizardStore((state) => state.setSelectedBuildingIndex);
+// Payload field selectors
+export const usePayload = () => useWizardStore((state) => state.payload);
+export const usePayloadField = <K extends keyof CreatePropertyPayload>(field: K) =>
+  useWizardStore((state) => state.payload[field]);
+export const useUpdatePayload = () => useWizardStore((state) => state.updatePayload);
 
-export const useGeneralInfo = () => useWizardStore((state) => state.generalInfo);
-export const useUpdateGeneralInfo = () => useWizardStore((state) => state.updateGeneralInfo);
+// Buildings
+export const useBuildings = () => useWizardStore((state) => state.payload.buildings);
+export const useBuilding = (index: number) =>
+  useWizardStore((state) => state.payload.buildings[index]);
+export const useBuildingsCount = () => useWizardStore((state) => state.payload.buildings.length);
 
-export const useBuildings = () => useWizardStore((state) => state.buildings);
-export const useBuilding = (index: number) => useWizardStore((state) => state.buildings[index]);
-export const useBuildingsCount = () => useWizardStore((state) => state.buildings.length);
-
+// Units
 export const useUnits = (buildingIndex: number) =>
-  useWizardStore((state) => state.buildings[buildingIndex]?.units ?? EMPTY_UNITS);
+  useWizardStore((state) => state.payload.buildings[buildingIndex]?.units ?? EMPTY_UNITS);
 export const useUnit = (buildingIndex: number, unitIndex: number) =>
-  useWizardStore((state) => state.buildings[buildingIndex]?.units[unitIndex]);
+  useWizardStore((state) => state.payload.buildings[buildingIndex]?.units[unitIndex]);
 
+// Reset
 export const useReset = () => useWizardStore((state) => state.reset);
 
-// Building actions - useShallow prevents infinite loops by doing shallow equality check
+// Building actions
 export const useBuildingActions = () =>
   useWizardStore(
     useShallow((state) => ({
@@ -260,7 +304,7 @@ export const useBuildingActions = () =>
     }))
   );
 
-// Unit actions - useShallow prevents infinite loops by doing shallow equality check
+// Unit actions
 export const useUnitActions = () =>
   useWizardStore(
     useShallow((state) => ({
@@ -271,4 +315,3 @@ export const useUnitActions = () =>
       deleteUnit: state.deleteUnit,
     }))
   );
-
