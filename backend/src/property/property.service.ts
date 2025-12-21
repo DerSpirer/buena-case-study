@@ -235,7 +235,7 @@ Return ONLY the JSON object, no additional text or markdown formatting.`;
 
     // Send request to OpenAI with file as attachment
     const response = await this.openai.responses.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       input: [
         {
           role: 'user',

@@ -247,13 +247,57 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
     }),
 
   // Returns the payload object ready to send to the API
-  getPayload: () => get().payload,
+  // Sanitizes unit data to ensure null values are converted to proper defaults
+  getPayload: () => {
+    const payload = get().payload;
+    return {
+      ...payload,
+      buildings: payload.buildings.map((building) => ({
+        ...building,
+        units: building.units.map((unit) => ({
+          ...unit,
+          // Ensure numeric fields are never null
+          floor: unit.floor ?? 0,
+          size: unit.size ?? 0,
+          coOwnershipShare: unit.coOwnershipShare ?? 0,
+          constructionYear: unit.constructionYear ?? new Date().getFullYear(),
+          rooms: unit.rooms ?? 0,
+          // Convert null entrance to undefined (optional field)
+          entrance: unit.entrance ?? undefined,
+        })),
+      })),
+    };
+  },
 
   // Set extracted data from AI, merging with existing payload
+  // Sanitizes unit data to ensure null values are converted to proper defaults
   setExtractedData: (data) =>
-    set((state) => ({
-      payload: { ...state.payload, ...data },
-    })),
+    set((state) => {
+      // Sanitize buildings and units if present
+      const sanitizedData = { ...data };
+      if (sanitizedData.buildings) {
+        sanitizedData.buildings = sanitizedData.buildings.map((building) => ({
+          ...building,
+          units: building.units.map((unit) => ({
+            ...unit,
+            // Ensure numeric fields are never null
+            floor: unit.floor ?? 0,
+            size: unit.size ?? 0,
+            coOwnershipShare: unit.coOwnershipShare ?? 0,
+            constructionYear: unit.constructionYear ?? new Date().getFullYear(),
+            rooms: unit.rooms ?? 0,
+            // Ensure string fields have defaults
+            unitNumber: unit.unitNumber ?? '',
+            type: unit.type ?? 'Apartment',
+            // Convert null entrance to undefined (optional field)
+            entrance: unit.entrance ?? undefined,
+          })),
+        }));
+      }
+      return {
+        payload: { ...state.payload, ...sanitizedData },
+      };
+    }),
 
   // Edit mode helpers
   isEditMode: () => get().editingPropertyId !== null,
@@ -330,6 +374,9 @@ export const useUnit = (buildingIndex: number, unitIndex: number) =>
 
 // Reset
 export const useReset = () => useWizardStore((state) => state.reset);
+
+// Get sanitized payload for API submission
+export const useGetPayload = () => useWizardStore((state) => state.getPayload);
 
 // Set extracted data from AI
 export const useSetExtractedData = () => useWizardStore((state) => state.setExtractedData);

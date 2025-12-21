@@ -26,7 +26,7 @@ import {
   useReset,
   useIsCurrentStepValid,
   useCurrentStepValidationErrors,
-  usePayload,
+  useGetPayload,
   useEditingPropertyId,
   useIsEditMode,
 } from './wizardStore';
@@ -51,7 +51,7 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
   const reset = useReset();
   const isCurrentStepValid = useIsCurrentStepValid();
   const validationErrors = useCurrentStepValidationErrors();
-  const payload = usePayload();
+  const getPayload = useGetPayload();
   const editingPropertyId = useEditingPropertyId();
   const isEditMode = useIsEditMode();
 
@@ -75,6 +75,8 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
     setError(null);
 
     try {
+      // Get sanitized payload (null values converted to proper defaults)
+      const payload = getPayload();
       // Ensure managementType is valid before sending
       const apiPayload = {
         ...payload,
