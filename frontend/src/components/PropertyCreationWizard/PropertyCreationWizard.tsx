@@ -29,7 +29,7 @@ const steps = [
   { label: 'Units', description: 'Apartments, offices & more' },
 ];
 
-function WizardContent({ onClose }: { onClose: () => void }) {
+const WizardContent = ({ onClose }: { onClose: () => void }) => {
   const activeStep = useActiveStep();
   const setActiveStep = useSetActiveStep();
   const reset = useReset();

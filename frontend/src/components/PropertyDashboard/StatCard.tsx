@@ -6,7 +6,7 @@ interface StatCardProps {
   variant: 'primary' | 'secondary';
 }
 
-export default function StatCard({ label, value, variant }: StatCardProps) {
+const StatCard = ({ label, value, variant }: StatCardProps) => {
   return (
     <Paper
       sx={{
@@ -34,5 +34,6 @@ export default function StatCard({ label, value, variant }: StatCardProps) {
       </Typography>
     </Paper>
   );
-}
+};
 
+export default StatCard;

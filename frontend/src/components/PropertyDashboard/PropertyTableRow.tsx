@@ -7,7 +7,7 @@ interface PropertyTableRowProps {
   property: Property;
 }
 
-function PropertyTypeChip({ type }: { type: Property['type'] }) {
+const PropertyTypeChip = ({ type }: { type: Property['type'] }) => {
   const isWEG = type === 'WEG';
 
   return (
@@ -18,9 +18,9 @@ function PropertyTypeChip({ type }: { type: Property['type'] }) {
       color={isWEG ? 'primary' : 'secondary'}
     />
   );
-}
+};
 
-export default function PropertyTableRow({ property }: PropertyTableRowProps) {
+const PropertyTableRow = ({ property }: PropertyTableRowProps) => {
   return (
     <TableRow>
       <TableCell>
@@ -41,5 +41,6 @@ export default function PropertyTableRow({ property }: PropertyTableRowProps) {
       </TableCell>
     </TableRow>
   );
-}
+};
 
+export default PropertyTableRow;

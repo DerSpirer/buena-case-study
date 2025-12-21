@@ -18,7 +18,7 @@ import PropertyTableRow from './PropertyTableRow';
 import StatCard from './StatCard';
 import PropertyCreationWizard from '../PropertyCreationWizard';
 
-export default function PropertyDashboard() {
+const PropertyDashboard = () => {
   const [wizardOpen, setWizardOpen] = useState(false);
 
   const handleCreateProperty = () => {
@@ -79,5 +79,6 @@ export default function PropertyDashboard() {
       <PropertyCreationWizard open={wizardOpen} onClose={handleCloseWizard} />
     </Box>
   );
-}
+};
 
+export default PropertyDashboard;
