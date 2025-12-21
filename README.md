@@ -6,6 +6,11 @@
 
 **Frontend:** React 19 with Vite, Material UI, Zustand for state management, and TypeScript.
 
+## Prerequisites
+
+- PostgreSQL database
+- OpenAI API key
+
 ## Quickstart
 
 ### 1. Environment Setup
