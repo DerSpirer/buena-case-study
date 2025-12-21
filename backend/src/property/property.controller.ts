@@ -49,4 +49,25 @@ export class PropertyController {
       filename: result.filename,
     };
   }
+
+  @Post('extract')
+  async extractData(@Body('filename') filename: string) {
+    if (!filename) {
+      throw new BadRequestException('Filename is required');
+    }
+
+    if (!this.propertyService.fileExists(filename)) {
+      throw new BadRequestException(
+        `File "${filename}" not found. Please upload the file first.`,
+      );
+    }
+
+    const extractedData =
+      await this.propertyService.extractDataWithOpenAI(filename);
+
+    return {
+      message: 'Data extracted successfully',
+      data: extractedData,
+    };
+  }
 }
