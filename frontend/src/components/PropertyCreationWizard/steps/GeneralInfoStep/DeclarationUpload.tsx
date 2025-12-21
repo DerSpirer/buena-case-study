@@ -15,17 +15,21 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { useUpdatePayload } from '../../wizardStore';
+import { useUpdatePayload, useSetExtractedData, usePayloadField } from '../../wizardStore';
 import { propertyApi } from '../../../../api/propertyApi';
 
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
+type ExtractionStatus = 'idle' | 'extracting' | 'success' | 'error';
 
 const DeclarationUpload: FC = () => {
   const updatePayload = useUpdatePayload();
+  const setExtractedData = useSetExtractedData();
+  const declarationFileName = usePayloadField('declarationFileName');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
+  const [extractionStatus, setExtractionStatus] = useState<ExtractionStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const updateFileName = useCallback(
@@ -34,6 +38,24 @@ const DeclarationUpload: FC = () => {
     },
     [updatePayload]
   );
+
+  const handleExtractWithAI = async () => {
+    if (!declarationFileName) return;
+
+    setExtractionStatus('extracting');
+    setErrorMessage('');
+
+    try {
+      const response = await propertyApi.extractWithAI(declarationFileName);
+      setExtractedData(response.data);
+      setExtractionStatus('success');
+    } catch (error) {
+      setExtractionStatus('error');
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Failed to extract data'
+      );
+    }
+  };
 
   const handleFileChange = async (file: File | null) => {
     if (!file || file.type !== 'application/pdf') {
@@ -82,6 +104,7 @@ const DeclarationUpload: FC = () => {
   const handleRemoveFile = () => {
     setUploadedFile(null);
     setUploadStatus('idle');
+    setExtractionStatus('idle');
     setErrorMessage('');
     updateFileName('');
     if (fileInputRef.current) {
@@ -222,10 +245,25 @@ const DeclarationUpload: FC = () => {
             <Button
               variant="outlined"
               size="small"
-              startIcon={<AutoAwesomeIcon />}
+              startIcon={
+                extractionStatus === 'extracting' ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : extractionStatus === 'success' ? (
+                  <CheckCircleIcon />
+                ) : (
+                  <AutoAwesomeIcon />
+                )
+              }
+              onClick={handleExtractWithAI}
+              disabled={extractionStatus === 'extracting'}
+              color={extractionStatus === 'success' ? 'success' : 'primary'}
               sx={{ mr: 1 }}
             >
-              Extract with AI
+              {extractionStatus === 'extracting'
+                ? 'Extracting...'
+                : extractionStatus === 'success'
+                  ? 'Extracted!'
+                  : 'Extract with AI'}
             </Button>
           )}
           <IconButton

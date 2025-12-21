@@ -123,6 +123,7 @@ interface WizardActions {
   // Utility
   reset: () => void;
   getPayload: () => CreatePropertyPayload;
+  setExtractedData: (data: Partial<CreatePropertyPayload>) => void;
 }
 
 export type WizardStore = WizardState & WizardActions;
@@ -259,6 +260,12 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
 
   // Returns the payload object ready to send to the API
   getPayload: () => get().payload,
+
+  // Set extracted data from AI, merging with existing payload
+  setExtractedData: (data) =>
+    set((state) => ({
+      payload: { ...state.payload, ...data },
+    })),
 }));
 
 // ============================================================================
@@ -293,6 +300,9 @@ export const useUnit = (buildingIndex: number, unitIndex: number) =>
 
 // Reset
 export const useReset = () => useWizardStore((state) => state.reset);
+
+// Set extracted data from AI
+export const useSetExtractedData = () => useWizardStore((state) => state.setExtractedData);
 
 // Building actions
 export const useBuildingActions = () =>

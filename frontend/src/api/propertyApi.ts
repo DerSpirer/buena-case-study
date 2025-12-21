@@ -34,6 +34,39 @@ export interface UploadFileResponse {
   filename: string;
 }
 
+export interface ExtractedBuildingData {
+  street: string;
+  houseNumber: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  units: ExtractedUnitData[];
+}
+
+export interface ExtractedUnitData {
+  unitNumber: string;
+  type: 'Apartment' | 'Office' | 'Garden' | 'Parking';
+  floor: number;
+  entrance: string;
+  size: number;
+  coOwnershipShare: number;
+  constructionYear: number;
+  rooms: number;
+}
+
+export interface ExtractedPropertyData {
+  managementType?: 'WEG' | 'MV';
+  name?: string;
+  propertyManager?: string;
+  accountant?: string;
+  buildings?: ExtractedBuildingData[];
+}
+
+export interface ExtractWithAIResponse {
+  message: string;
+  data: ExtractedPropertyData;
+}
+
 export const propertyApi = {
   async getAll(): Promise<Property[]> {
     const { data } = await apiClient.get<Property[]>('/properties');
@@ -62,6 +95,14 @@ export const propertyApi = {
           'Content-Type': 'multipart/form-data',
         },
       }
+    );
+    return data;
+  },
+
+  async extractWithAI(filename: string): Promise<ExtractWithAIResponse> {
+    const { data } = await apiClient.post<ExtractWithAIResponse>(
+      '/properties/extract',
+      { filename }
     );
     return data;
   },
