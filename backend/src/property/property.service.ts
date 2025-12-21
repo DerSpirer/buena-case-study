@@ -226,13 +226,10 @@ Extract the data and return it as a valid JSON object with the following structu
   ]
 }
 
-If any field cannot be determined from the document, use reasonable defaults:
-- For managementType, default to "WEG" if it's a condominium/apartment building
-- For missing names, use "Unknown"
-- For missing addresses, extract what's available
-- For units, extract all individual units mentioned with their details
+IMPORTANT: Only include fields that are explicitly stated in the document.
+- If a field cannot be determined from the document, set it to null
 - For coOwnershipShare, if given as MEA (Miteigentumsanteile), convert to decimal
-- For constructionYear, if not found, use current year
+- Extract all individual units mentioned with their available details
 
 Return ONLY the JSON object, no additional text or markdown formatting.`;
 
