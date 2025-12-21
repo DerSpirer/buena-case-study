@@ -25,6 +25,7 @@ import PropertyTableRow from './PropertyTableRow';
 import StatCard from './StatCard';
 import PropertyCreationWizard from '../PropertyCreationWizard';
 import { useLoadProperty, useReset } from '../PropertyCreationWizard/wizardStore';
+import { useSnackbar } from '../Snackbar';
 
 const SITE_TITLE = 'Buena Case Study - Tom Spirer';
 
@@ -39,6 +40,7 @@ const PropertyDashboard = () => {
 
   const loadProperty = useLoadProperty();
   const reset = useReset();
+  const { showSuccess } = useSnackbar();
 
   const fetchProperties = useCallback(async () => {
     setIsLoading(true);
@@ -81,9 +83,10 @@ const PropertyDashboard = () => {
     setWizardOpen(false);
   };
 
-  const handleWizardSuccess = () => {
+  const handleWizardSuccess = (wasEdit: boolean) => {
     setWizardOpen(false);
     fetchProperties();
+    showSuccess(wasEdit ? 'Property updated successfully!' : 'Property created successfully!');
   };
 
   const handleDeleteClick = (id: string) => {

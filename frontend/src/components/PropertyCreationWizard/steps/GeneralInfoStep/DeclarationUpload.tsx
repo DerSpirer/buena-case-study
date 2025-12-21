@@ -8,8 +8,6 @@ import {
   IconButton,
   alpha,
   CircularProgress,
-  Snackbar,
-  Alert,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
@@ -19,15 +17,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useUpdatePayload, useSetExtractedData, usePayloadField } from '../../wizardStore';
 import { propertyApi } from '../../../../api/propertyApi';
+import { useSnackbar } from '../../../Snackbar';
 
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 type ExtractionStatus = 'idle' | 'extracting' | 'success' | 'error';
-
-interface SnackbarState {
-  open: boolean;
-  message: string;
-  severity: 'success' | 'error';
-}
 
 /**
  * Extract original filename from the stored filename.
@@ -66,30 +59,18 @@ const DeclarationUpload: FC = () => {
   const updatePayload = useUpdatePayload();
   const setExtractedData = useSetExtractedData();
   const declarationFileName = usePayloadField('declarationFileName');
+  const { showSuccess, showError } = useSnackbar();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pendingFileName, setPendingFileName] = useState<string>(''); // Only used during upload
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
   const [extractionStatus, setExtractionStatus] = useState<ExtractionStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [snackbar, setSnackbar] = useState<SnackbarState>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
 
   // Single source of truth: file exists if declarationFileName is set or we're currently uploading
   const hasFile = Boolean(declarationFileName) || uploadStatus === 'uploading';
   // For display: show success if we have a file and we're not currently uploading
   const displayStatus = declarationFileName && uploadStatus === 'idle' ? 'success' : uploadStatus;
-
-  const showSnackbar = useCallback((message: string, severity: 'success' | 'error') => {
-    setSnackbar({ open: true, message, severity });
-  }, []);
-
-  const handleCloseSnackbar = useCallback(() => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  }, []);
 
   const updateFileName = useCallback(
     (fileName: string) => {
@@ -108,12 +89,12 @@ const DeclarationUpload: FC = () => {
       const response = await propertyApi.extractWithAI(declarationFileName);
       setExtractedData(response.data);
       setExtractionStatus('success');
-      showSnackbar('Data extracted successfully!', 'success');
+      showSuccess('Data extracted successfully!');
     } catch (error) {
       setExtractionStatus('error');
       const message = error instanceof Error ? error.message : 'Failed to extract data';
       setErrorMessage(message);
-      showSnackbar(message, 'error');
+      showError(message);
     }
   };
 
@@ -131,13 +112,13 @@ const DeclarationUpload: FC = () => {
       setUploadStatus('idle'); // Reset to idle - displayStatus will show 'success' because declarationFileName is set
       setPendingFileName('');
       updateFileName(response.filename);
-      showSnackbar('File uploaded successfully!', 'success');
+      showSuccess('File uploaded successfully!');
     } catch (error) {
       setUploadStatus('error');
       const message = error instanceof Error ? error.message : 'Failed to upload file';
       setErrorMessage(message);
       updateFileName('');
-      showSnackbar(message, 'error');
+      showError(message);
     }
   };
 
@@ -337,22 +318,6 @@ const DeclarationUpload: FC = () => {
           </IconButton>
         </Paper>
       )}
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

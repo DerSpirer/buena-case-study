@@ -34,7 +34,7 @@ import { propertyApi } from '../../api/propertyApi';
 interface PropertyCreationWizardProps {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (wasEdit: boolean) => void;
 }
 
 const steps = [
@@ -43,7 +43,7 @@ const steps = [
   { label: 'Units', description: 'Apartments, offices & more' },
 ];
 
-const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?: () => void }) => {
+const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?: (wasEdit: boolean) => void }) => {
   const activeStep = useActiveStep();
   const setActiveStep = useSetActiveStep();
   const reset = useReset();
@@ -98,8 +98,9 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
   };
 
   const handleSuccess = () => {
+    const wasEdit = isEditMode;
     reset();
-    onSuccess?.();
+    onSuccess?.(wasEdit);
   };
 
   const renderStepContent = () => {
