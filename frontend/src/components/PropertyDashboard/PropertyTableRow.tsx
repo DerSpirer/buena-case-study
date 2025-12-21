@@ -16,6 +16,11 @@ const PropertyTypeChip = ({ type }: { type: Property['type'] }) => {
       label={type}
       size="small"
       color={isWEG ? 'primary' : 'secondary'}
+      sx={{
+        color: 'white',
+        bgcolor: isWEG ? 'primary.main' : 'secondary.main',
+        '& .MuiChip-icon': { color: 'white' },
+      }}
     />
   );
 };

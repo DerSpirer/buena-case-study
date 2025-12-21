@@ -45,7 +45,7 @@ const theme = createTheme({
     },
     background: {
       default: '#f8fafc',
-      paper: 'rgba(255, 255, 255, 0.9)',
+      paper: '#ffffff',
       paperLight: 'rgba(255, 255, 255, 0.6)',
       gradient: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%)',
     },
@@ -59,30 +59,14 @@ const theme = createTheme({
       600: '#64748b',
     },
   },
-  spacing: 8,
   typography: {
     fontFamily: '"Roboto", -apple-system, BlinkMacSystemFont, sans-serif',
-    h3: {
-      fontWeight: 500,
-      letterSpacing: '-0.02em',
-    },
-    h4: {
-      fontWeight: 500,
-      fontSize: '2.25rem',
-      lineHeight: 1,
-    },
-    body1: {},
-    body2: {
-      fontSize: '0.875rem',
-    },
     button: {
-      fontWeight: 500,
       textTransform: 'none',
     },
     mono: {
-      fontFamily: '"Roboto", monospace',
+      fontFamily: 'monospace',
       fontSize: '0.85rem',
-      fontWeight: 400,
     },
     label: {
       fontSize: '0.8rem',
@@ -104,152 +88,26 @@ const theme = createTheme({
     borderRadius: 8,
   },
   components: {
-    MuiCssBaseline: {
-      styleOverrides: `
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        html {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-          background: rgba(226, 232, 240, 0.8);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-          background: rgba(99, 102, 241, 0.5);
-          border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-          background: rgba(99, 102, 241, 0.7);
-        }
-      `,
-    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
-      },
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-        },
-        sizeSmall: {
-          padding: '4px 12px',
-          fontSize: '0.8125rem',
-        },
-        sizeMedium: {
-          padding: '6px 16px',
-        },
-        sizeLarge: {
-          padding: '10px 24px',
-        },
-        containedPrimary: {
-          backgroundColor: '#6366f1',
-          '&:hover': {
-            backgroundColor: '#4f46e5',
-          },
-        },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(100, 116, 139, 0.15)',
-        },
-      },
-    },
-    MuiTableContainer: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
-        root: {
-          borderBottom: '1px solid rgba(100, 116, 139, 0.12)',
-          padding: '20px 16px',
-        },
         head: {
           fontWeight: 500,
           fontSize: '0.75rem',
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
           color: '#64748b',
-          borderBottom: '1px solid rgba(100, 116, 139, 0.15)',
-          padding: '16px',
-        },
-        body: {
-          fontSize: '0.95rem',
-        },
-      },
-    },
-    MuiTableRow: {
-      styleOverrides: {
-        root: {
-          transition: 'background 0.15s ease',
-          '&:hover': {
-            background: 'rgba(99, 102, 241, 0.06)',
-          },
-          '&:last-child td': {
-            borderBottom: 0,
-          },
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          fontWeight: 500,
-          fontSize: '0.75rem',
-          letterSpacing: '0.025em',
-        },
-        iconSmall: {
-          fontSize: 16,
-        },
-      },
-      variants: [
-        {
-          props: { color: 'primary' },
-          style: {
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-            color: '#4f46e5',
-            '& .MuiChip-icon': {
-              color: 'inherit',
-            },
-          },
-        },
-        {
-          props: { color: 'secondary' },
-          style: {
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            color: '#047857',
-            '& .MuiChip-icon': {
-              color: 'inherit',
-            },
-          },
-        },
-      ],
-    },
-    MuiContainer: {
-      styleOverrides: {
-        root: {
-          maxWidth: '1200px !important',
         },
       },
     },
