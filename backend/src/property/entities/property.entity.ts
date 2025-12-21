@@ -28,7 +28,7 @@ export class Property {
   accountant: string;
 
   @Column({ type: 'varchar', length: 500 })
-  declarationFilePath: string;
+  declarationFileName: string;
 
   @OneToMany('Building', 'property', { cascade: true })
   buildings: Building[];

@@ -28,7 +28,7 @@ export class CreatePropertyDto {
 
   @IsString()
   @IsNotEmpty()
-  declarationFilePath: string;
+  declarationFileName: string;
 
   @IsArray()
   @ValidateNested({ each: true })

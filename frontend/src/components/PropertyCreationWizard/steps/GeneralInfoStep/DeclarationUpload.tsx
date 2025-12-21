@@ -7,30 +7,53 @@ import {
   Paper,
   IconButton,
   alpha,
+  CircularProgress,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useUpdateGeneralInfo } from '../../wizardStore';
+import { propertyApi } from '../../../../api/propertyApi';
+
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 const DeclarationUpload: FC = () => {
   const updateGeneralInfo = useUpdateGeneralInfo();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const updateFilePath = useCallback(
+  const updateFileName = useCallback(
     (fileName: string) => {
-      updateGeneralInfo('declarationFilePath', fileName);
+      updateGeneralInfo('declarationFileName', fileName);
     },
     [updateGeneralInfo]
   );
 
-  const handleFileChange = (file: File | null) => {
-    if (file && file.type === 'application/pdf') {
-      setUploadedFile(file);
-      updateFilePath(file.name);
+  const handleFileChange = async (file: File | null) => {
+    if (!file || file.type !== 'application/pdf') {
+      return;
+    }
+
+    setUploadedFile(file);
+    setUploadStatus('uploading');
+    setErrorMessage('');
+
+    try {
+      const response = await propertyApi.uploadFile(file);
+      setUploadStatus('success');
+      updateFileName(response.filename);
+    } catch (error) {
+      setUploadStatus('error');
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Failed to upload file'
+      );
+      updateFileName('');
     }
   };
 
@@ -58,7 +81,9 @@ const DeclarationUpload: FC = () => {
 
   const handleRemoveFile = () => {
     setUploadedFile(null);
-    updateFilePath('');
+    setUploadStatus('idle');
+    setErrorMessage('');
+    updateFileName('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -140,8 +165,11 @@ const DeclarationUpload: FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.04),
-            borderColor: 'secondary.main',
+            bgcolor: (theme) =>
+              uploadStatus === 'error'
+                ? alpha(theme.palette.error.main, 0.04)
+                : alpha(theme.palette.secondary.main, 0.04),
+            borderColor: uploadStatus === 'error' ? 'error.main' : 'secondary.main',
           }}
         >
           <Box
@@ -149,13 +177,24 @@ const DeclarationUpload: FC = () => {
               width: 44,
               height: 44,
               borderRadius: 1,
-              bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.1),
+              bgcolor: (theme) =>
+                uploadStatus === 'error'
+                  ? alpha(theme.palette.error.main, 0.1)
+                  : alpha(theme.palette.secondary.main, 0.1),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <InsertDriveFileIcon sx={{ color: 'secondary.main' }} />
+            {uploadStatus === 'uploading' ? (
+              <CircularProgress size={24} color="secondary" />
+            ) : uploadStatus === 'error' ? (
+              <ErrorOutlineIcon sx={{ color: 'error.main' }} />
+            ) : uploadStatus === 'success' ? (
+              <CheckCircleIcon sx={{ color: 'success.main' }} />
+            ) : (
+              <InsertDriveFileIcon sx={{ color: 'secondary.main' }} />
+            )}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
@@ -166,19 +205,35 @@ const DeclarationUpload: FC = () => {
             >
               {uploadedFile.name}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {(uploadedFile.size / 1024).toFixed(1)} KB
+            <Typography
+              variant="caption"
+              color={uploadStatus === 'error' ? 'error.main' : 'text.secondary'}
+            >
+              {uploadStatus === 'uploading'
+                ? 'Uploading...'
+                : uploadStatus === 'error'
+                  ? errorMessage
+                  : uploadStatus === 'success'
+                    ? 'Uploaded successfully'
+                    : `${(uploadedFile.size / 1024).toFixed(1)} KB`}
             </Typography>
           </Box>
-          <Button
-            variant="outlined"
+          {uploadStatus === 'success' && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<AutoAwesomeIcon />}
+              sx={{ mr: 1 }}
+            >
+              Extract with AI
+            </Button>
+          )}
+          <IconButton
             size="small"
-            startIcon={<AutoAwesomeIcon />}
-            sx={{ mr: 1 }}
+            onClick={handleRemoveFile}
+            disabled={uploadStatus === 'uploading'}
+            sx={{ color: 'text.secondary' }}
           >
-            Extract with AI
-          </Button>
-          <IconButton size="small" onClick={handleRemoveFile} sx={{ color: 'text.secondary' }}>
             <DeleteOutlineIcon />
           </IconButton>
         </Paper>

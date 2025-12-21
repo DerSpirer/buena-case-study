@@ -30,7 +30,7 @@ export interface GeneralInfoData {
   name: string;
   propertyManager: string;
   accountant: string;
-  declarationFilePath: string;
+  declarationFileName: string;
 }
 
 // The full property data for API submission
@@ -43,7 +43,7 @@ const initialGeneralInfo: GeneralInfoData = {
   name: '',
   propertyManager: '',
   accountant: '',
-  declarationFilePath: '',
+  declarationFileName: '',
 };
 
 const createEmptyUnit = (): CreateUnitData => ({

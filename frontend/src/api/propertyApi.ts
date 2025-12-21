@@ -13,7 +13,7 @@ export interface CreatePropertyPayload {
   name: string;
   propertyManager: string;
   accountant: string;
-  declarationFilePath: string;
+  declarationFileName: string;
   buildings: CreateBuildingPayload[];
 }
 
@@ -29,6 +29,11 @@ export interface CreateUnitPayload {
   area?: number;
 }
 
+export interface UploadFileResponse {
+  message: string;
+  filename: string;
+}
+
 export const propertyApi = {
   async getAll(): Promise<Property[]> {
     const { data } = await apiClient.get<Property[]>('/properties');
@@ -42,6 +47,22 @@ export const propertyApi = {
 
   async create(payload: CreatePropertyPayload): Promise<Property> {
     const { data } = await apiClient.post<Property>('/properties', payload);
+    return data;
+  },
+
+  async uploadFile(file: File): Promise<UploadFileResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const { data } = await apiClient.post<UploadFileResponse>(
+      '/properties/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
     return data;
   },
 };

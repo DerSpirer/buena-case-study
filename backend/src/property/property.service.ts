@@ -30,7 +30,7 @@ export class PropertyService {
       name: dto.name,
       propertyManager: dto.propertyManager,
       accountant: dto.accountant,
-      declarationFilePath: dto.declarationFilePath,
+      declarationFileName: dto.declarationFileName,
       buildings: dto.buildings,
     });
 
