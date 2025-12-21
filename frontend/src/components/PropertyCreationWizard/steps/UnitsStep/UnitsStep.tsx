@@ -81,9 +81,9 @@ const UnitsStep: FC = () => {
                 <TableCell sx={{ width: 110, py: 1.5 }}>Type</TableCell>
                 <TableCell sx={{ width: 70, py: 1.5 }}>Floor</TableCell>
                 <TableCell sx={{ width: 80, py: 1.5 }}>Entrance</TableCell>
-                <TableCell sx={{ width: 90, py: 1.5 }}>Size (m²)</TableCell>
+                <TableCell sx={{ width: 90, py: 1.5, whiteSpace: 'nowrap' }}>Size (m²)</TableCell>
                 <TableCell sx={{ width: 70, py: 1.5 }}>Rooms</TableCell>
-                <TableCell sx={{ width: 90, py: 1.5 }}>Share (%)</TableCell>
+                <TableCell sx={{ width: 90, py: 1.5 }}>Share</TableCell>
                 <TableCell sx={{ width: 90, py: 1.5 }}>Built</TableCell>
                 <TableCell sx={{ width: 80, py: 1.5 }} align="center">
                   Actions

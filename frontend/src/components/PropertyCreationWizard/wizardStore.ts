@@ -378,8 +378,8 @@ const isUnitValid = (unit: UnitPayload): boolean => {
     unit.unitNumber.trim().length > 0 &&
     validTypes.includes(unit.type) &&
     Number.isInteger(unit.floor) &&
-    unit.size >= 0 &&
-    unit.coOwnershipShare >= 0 &&
+    unit.size > 0 &&
+    unit.coOwnershipShare > 0 &&
     unit.coOwnershipShare <= 1 &&
     Number.isInteger(unit.constructionYear) &&
     unit.constructionYear >= 1000 &&

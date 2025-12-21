@@ -13,7 +13,7 @@ import {
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useUnit, useUnitActions } from '../../wizardStore';
-import type { CreateUnitPayload, UnitType } from '../../../../types/Property';
+import type { UnitPayload, UnitType } from '../../../../types/Property';
 
 const unitTypeOptions: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 
@@ -27,7 +27,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
   const { updateUnit, duplicateUnit, deleteUnit } = useUnitActions();
 
   const handleUpdateField = useCallback(
-    (field: keyof CreateUnitPayload, value: string | number) => {
+    (field: keyof UnitPayload, value: string | number) => {
       updateUnit(buildingIndex, unitIndex, field, value as never);
     },
     [updateUnit, buildingIndex, unitIndex]
@@ -41,7 +41,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
     deleteUnit(buildingIndex, unitIndex);
   }, [deleteUnit, buildingIndex, unitIndex]);
 
-  const handleNumberChange = (field: keyof CreateUnitPayload, value: string) => {
+  const handleNumberChange = (field: keyof UnitPayload, value: string) => {
     const numValue = value === '' ? 0 : Number(value);
     handleUpdateField(field, numValue);
   };
@@ -158,13 +158,13 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
           type="number"
           value={unit.coOwnershipShare || ''}
           onChange={(e) => handleNumberChange('coOwnershipShare', e.target.value)}
-          placeholder="0"
+          placeholder="0.00"
           size="small"
           variant="standard"
           fullWidth
           InputProps={{
             disableUnderline: true,
-            inputProps: { min: 0, max: 100, step: 0.01 },
+            inputProps: { min: 0, max: 1, step: 0.0001 },
           }}
           sx={inputSx}
         />
