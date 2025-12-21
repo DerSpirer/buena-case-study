@@ -13,34 +13,28 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { CreateBuildingData } from '../../usePropertyCreationWizard';
+import { useBuilding, useBuildingActions } from '../../wizardStore';
+import type { CreateBuildingData } from '../../wizardStore';
 
 interface BuildingCardProps {
   index: number;
 }
 
 const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
-  const { formData, setFormData } = usePropertyCreationWizard();
-  const building = formData.buildings[index];
+  const building = useBuilding(index);
+  const { updateBuilding, deleteBuilding } = useBuildingActions();
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const updateField = useCallback(
+  const handleUpdateField = useCallback(
     (field: keyof CreateBuildingData, value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.map((b, i) => (i === index ? { ...b, [field]: value } : b)),
-      }));
+      updateBuilding(index, field, value);
     },
-    [setFormData, index]
+    [updateBuilding, index]
   );
 
   const handleDelete = useCallback(() => {
-    setFormData((prev) => ({
-      ...prev,
-      buildings: prev.buildings.filter((_, i) => i !== index),
-    }));
-  }, [setFormData, index]);
+    deleteBuilding(index);
+  }, [deleteBuilding, index]);
 
   if (!building) return null;
 
@@ -129,7 +123,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             <TextField
               label="Street"
               value={building.street}
-              onChange={(e) => updateField('street', e.target.value)}
+              onChange={(e) => handleUpdateField('street', e.target.value)}
               placeholder="e.g., Musterstraße"
               fullWidth
               size="small"
@@ -137,7 +131,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             <TextField
               label="House Number"
               value={building.houseNumber}
-              onChange={(e) => updateField('houseNumber', e.target.value)}
+              onChange={(e) => handleUpdateField('houseNumber', e.target.value)}
               placeholder="e.g., 42a"
               fullWidth
               size="small"
@@ -149,7 +143,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             <TextField
               label="Postal Code"
               value={building.postalCode}
-              onChange={(e) => updateField('postalCode', e.target.value)}
+              onChange={(e) => handleUpdateField('postalCode', e.target.value)}
               placeholder="e.g., 10115"
               fullWidth
               size="small"
@@ -157,7 +151,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             <TextField
               label="City"
               value={building.city}
-              onChange={(e) => updateField('city', e.target.value)}
+              onChange={(e) => handleUpdateField('city', e.target.value)}
               placeholder="e.g., Berlin"
               fullWidth
               size="small"
@@ -169,7 +163,7 @@ const BuildingCard: FC<BuildingCardProps> = ({ index }) => {
             <TextField
               label="Country"
               value={building.country}
-              onChange={(e) => updateField('country', e.target.value)}
+              onChange={(e) => handleUpdateField('country', e.target.value)}
               placeholder="e.g., Germany"
               fullWidth
               size="small"

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useCallback } from 'react';
+import { memo } from 'react';
 import {
   Box,
   Typography,
@@ -9,18 +9,12 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { CreatePropertyData, ManagementType } from '../../usePropertyCreationWizard';
+import { useGeneralInfo, useUpdateGeneralInfo } from '../../wizardStore';
+import type { ManagementType } from '../../wizardStore';
 
 const PropertyDetailsForm: FC = () => {
-  const { formData, setFormData } = usePropertyCreationWizard();
-
-  const updateField = useCallback(
-    <K extends keyof CreatePropertyData>(field: K, value: CreatePropertyData[K]) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    },
-    [setFormData]
-  );
+  const generalInfo = useGeneralInfo();
+  const updateGeneralInfo = useUpdateGeneralInfo();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -33,9 +27,9 @@ const PropertyDetailsForm: FC = () => {
           <InputLabel id="management-type-label">Management Type</InputLabel>
           <Select
             labelId="management-type-label"
-            value={formData.managementType}
+            value={generalInfo.managementType}
             label="Management Type"
-            onChange={(e) => updateField('managementType', e.target.value as ManagementType)}
+            onChange={(e) => updateGeneralInfo('managementType', e.target.value as ManagementType)}
           >
             <MenuItem value="WEG">WEG</MenuItem>
             <MenuItem value="MV">MV</MenuItem>
@@ -44,8 +38,8 @@ const PropertyDetailsForm: FC = () => {
 
         <TextField
           label="Property Name"
-          value={formData.name}
-          onChange={(e) => updateField('name', e.target.value)}
+          value={generalInfo.name}
+          onChange={(e) => updateGeneralInfo('name', e.target.value)}
           placeholder="e.g., Sonnenhof Residenz"
           fullWidth
         />
@@ -54,16 +48,16 @@ const PropertyDetailsForm: FC = () => {
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
         <TextField
           label="Property Manager"
-          value={formData.propertyManager}
-          onChange={(e) => updateField('propertyManager', e.target.value)}
+          value={generalInfo.propertyManager}
+          onChange={(e) => updateGeneralInfo('propertyManager', e.target.value)}
           placeholder="e.g., Anna Schmidt"
           fullWidth
         />
 
         <TextField
           label="Accountant"
-          value={formData.accountant}
-          onChange={(e) => updateField('accountant', e.target.value)}
+          value={generalInfo.accountant}
+          onChange={(e) => updateGeneralInfo('accountant', e.target.value)}
           placeholder="e.g., Klaus Fischer"
           fullWidth
         />
@@ -72,4 +66,4 @@ const PropertyDetailsForm: FC = () => {
   );
 };
 
-export default PropertyDetailsForm;
+export default memo(PropertyDetailsForm);

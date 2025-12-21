@@ -16,8 +16,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import GeneralInfoStep from './steps/GeneralInfoStep';
 import BuildingDataStep from './steps/BuildingDataStep';
 import UnitsStep from './steps/UnitsStep';
-import PropertyCreationWizardProvider from './PropertyCreationWizardProvider';
-import { usePropertyCreationWizard } from './usePropertyCreationWizard';
+import { useActiveStep, useSetActiveStep, useReset } from './wizardStore';
 
 interface PropertyCreationWizardProps {
   open: boolean;
@@ -31,7 +30,9 @@ const steps = [
 ];
 
 function WizardContent({ onClose }: { onClose: () => void }) {
-  const { activeStep, setActiveStep, reset } = usePropertyCreationWizard();
+  const activeStep = useActiveStep();
+  const setActiveStep = useSetActiveStep();
+  const reset = useReset();
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
@@ -199,9 +200,7 @@ export default function PropertyCreationWizard({ open, onClose }: PropertyCreati
         },
       }}
     >
-      <PropertyCreationWizardProvider>
-        <WizardContent onClose={onClose} />
-      </PropertyCreationWizardProvider>
+      <WizardContent onClose={onClose} />
     </Dialog>
   );
 }

@@ -12,68 +12,38 @@ import {
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { CreateUnitData, UnitType } from '../../usePropertyCreationWizard';
+import { useUnit, useUnitActions } from '../../wizardStore';
+import type { CreateUnitData, UnitType } from '../../wizardStore';
 
 const unitTypeOptions: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 
 interface UnitTableRowProps {
+  buildingIndex: number;
   unitIndex: number;
 }
 
-const UnitTableRow: FC<UnitTableRowProps> = ({ unitIndex }) => {
-  const { formData, setFormData, selectedBuildingIndex } = usePropertyCreationWizard();
-  const unit = formData.buildings[selectedBuildingIndex]?.units[unitIndex];
+const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
+  const unit = useUnit(buildingIndex, unitIndex);
+  const { updateUnit, duplicateUnit, deleteUnit } = useUnitActions();
 
-  const updateField = useCallback(
+  const handleUpdateField = useCallback(
     (field: keyof CreateUnitData, value: string | number) => {
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.map((building, bIdx) =>
-          bIdx === selectedBuildingIndex
-            ? {
-                ...building,
-                units: building.units.map((u, uIdx) =>
-                  uIdx === unitIndex ? { ...u, [field]: value } : u
-                ),
-              }
-            : building
-        ),
-      }));
+      updateUnit(buildingIndex, unitIndex, field, value as never);
     },
-    [setFormData, selectedBuildingIndex, unitIndex]
+    [updateUnit, buildingIndex, unitIndex]
   );
 
   const handleDuplicate = useCallback(() => {
-    setFormData((prev) => {
-      const unitToDuplicate = prev.buildings[selectedBuildingIndex]?.units[unitIndex];
-      if (!unitToDuplicate) return prev;
-
-      return {
-        ...prev,
-        buildings: prev.buildings.map((building, i) =>
-          i === selectedBuildingIndex
-            ? { ...building, units: [...building.units, { ...unitToDuplicate, unitNumber: '' }] }
-            : building
-        ),
-      };
-    });
-  }, [setFormData, selectedBuildingIndex, unitIndex]);
+    duplicateUnit(buildingIndex, unitIndex);
+  }, [duplicateUnit, buildingIndex, unitIndex]);
 
   const handleDelete = useCallback(() => {
-    setFormData((prev) => ({
-      ...prev,
-      buildings: prev.buildings.map((building, bIdx) =>
-        bIdx === selectedBuildingIndex
-          ? { ...building, units: building.units.filter((_, uIdx) => uIdx !== unitIndex) }
-          : building
-      ),
-    }));
-  }, [setFormData, selectedBuildingIndex, unitIndex]);
+    deleteUnit(buildingIndex, unitIndex);
+  }, [deleteUnit, buildingIndex, unitIndex]);
 
   const handleNumberChange = (field: keyof CreateUnitData, value: string) => {
     const numValue = value === '' ? 0 : Number(value);
-    updateField(field, numValue);
+    handleUpdateField(field, numValue);
   };
 
   if (!unit) return null;
@@ -96,7 +66,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           value={unit.unitNumber}
-          onChange={(e) => updateField('unitNumber', e.target.value)}
+          onChange={(e) => handleUpdateField('unitNumber', e.target.value)}
           placeholder="A101"
           size="small"
           variant="standard"
@@ -109,7 +79,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ unitIndex }) => {
         <TextField
           select
           value={unit.type}
-          onChange={(e) => updateField('type', e.target.value as UnitType)}
+          onChange={(e) => handleUpdateField('type', e.target.value as UnitType)}
           size="small"
           variant="standard"
           fullWidth
@@ -142,7 +112,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           value={unit.entrance}
-          onChange={(e) => updateField('entrance', e.target.value)}
+          onChange={(e) => handleUpdateField('entrance', e.target.value)}
           placeholder="A"
           size="small"
           variant="standard"

@@ -1,31 +1,13 @@
 import type { FC } from 'react';
-import { useCallback } from 'react';
 import { Box, Typography, Button, alpha } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ApartmentIcon from '@mui/icons-material/Apartment';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { CreateBuildingData } from '../../usePropertyCreationWizard';
+import { useBuildings, useBuildingActions } from '../../wizardStore';
 import BuildingCard from './BuildingCard';
 
 const BuildingDataStep: FC = () => {
-  const { formData, setFormData } = usePropertyCreationWizard();
-  const { buildings } = formData;
-
-  const addBuilding = useCallback(() => {
-    const newBuilding: CreateBuildingData = {
-      street: '',
-      houseNumber: '',
-      city: '',
-      postalCode: '',
-      country: 'Germany',
-      units: [],
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      buildings: [...prev.buildings, newBuilding],
-    }));
-  }, [setFormData]);
+  const buildings = useBuildings();
+  const { addBuilding } = useBuildingActions();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

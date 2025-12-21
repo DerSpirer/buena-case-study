@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useRef, useState, useCallback } from 'react';
+import { memo, useRef, useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -12,19 +12,19 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
+import { useUpdateGeneralInfo } from '../../wizardStore';
 
 const DeclarationUpload: FC = () => {
-  const { setFormData } = usePropertyCreationWizard();
+  const updateGeneralInfo = useUpdateGeneralInfo();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const updateFilePath = useCallback(
     (fileName: string) => {
-      setFormData((prev) => ({ ...prev, declarationFilePath: fileName }));
+      updateGeneralInfo('declarationFilePath', fileName);
     },
-    [setFormData]
+    [updateGeneralInfo]
   );
 
   const handleFileChange = (file: File | null) => {
@@ -187,4 +187,4 @@ const DeclarationUpload: FC = () => {
   );
 };
 
-export default DeclarationUpload;
+export default memo(DeclarationUpload);

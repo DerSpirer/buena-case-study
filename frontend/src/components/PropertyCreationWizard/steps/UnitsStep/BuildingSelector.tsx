@@ -2,53 +2,26 @@ import type { FC } from 'react';
 import { useCallback } from 'react';
 import { Box, TextField, MenuItem, Button, Chip, alpha } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
-import type { CreateUnitData, UnitType } from '../../usePropertyCreationWizard';
-
-const createEmptyUnit = (): CreateUnitData => ({
-  unitNumber: '',
-  type: 'Apartment' as UnitType,
-  floor: 0,
-  entrance: '',
-  size: 0,
-  coOwnershipShare: 0,
-  constructionYear: new Date().getFullYear(),
-  rooms: 0,
-});
+import {
+  useBuildings,
+  useSelectedBuildingIndex,
+  useSetSelectedBuildingIndex,
+  useUnitActions,
+} from '../../wizardStore';
 
 const BuildingSelector: FC = () => {
-  const { formData, setFormData, selectedBuildingIndex, setSelectedBuildingIndex } =
-    usePropertyCreationWizard();
-  const { buildings } = formData;
+  const buildings = useBuildings();
+  const selectedBuildingIndex = useSelectedBuildingIndex();
+  const setSelectedBuildingIndex = useSetSelectedBuildingIndex();
+  const { addUnit, addMultipleUnits } = useUnitActions();
 
-  const addUnit = useCallback(() => {
-    setFormData((prev) => ({
-      ...prev,
-      buildings: prev.buildings.map((building, i) =>
-        i === selectedBuildingIndex
-          ? { ...building, units: [...building.units, createEmptyUnit()] }
-          : building
-      ),
-    }));
-  }, [setFormData, selectedBuildingIndex]);
+  const handleAddUnit = useCallback(() => {
+    addUnit(selectedBuildingIndex);
+  }, [addUnit, selectedBuildingIndex]);
 
-  const addMultipleUnits = useCallback(
-    (count: number) => {
-      const newUnits = Array.from({ length: count }, createEmptyUnit);
-
-      setFormData((prev) => ({
-        ...prev,
-        buildings: prev.buildings.map((building, i) =>
-          i === selectedBuildingIndex
-            ? { ...building, units: [...building.units, ...newUnits] }
-            : building
-        ),
-      }));
-    },
-    [setFormData, selectedBuildingIndex]
-  );
-
-  const handleAdd5 = useCallback(() => addMultipleUnits(5), [addMultipleUnits]);
+  const handleAdd5 = useCallback(() => {
+    addMultipleUnits(selectedBuildingIndex, 5);
+  }, [addMultipleUnits, selectedBuildingIndex]);
 
   return (
     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -89,7 +62,7 @@ const BuildingSelector: FC = () => {
         <Button variant="outlined" size="small" onClick={handleAdd5} sx={{ whiteSpace: 'nowrap' }}>
           +5 Rows
         </Button>
-        <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={addUnit}>
+        <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={handleAddUnit}>
           Add Unit
         </Button>
       </Box>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@mui/material';
 import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
+import { useBuildings, useSelectedBuildingIndex } from '../../wizardStore';
 import EmptyBuildingsState from './EmptyBuildingsState';
 import BuildingSelector from './BuildingSelector';
 import UnitTableRow from './UnitTableRow';
@@ -21,8 +21,8 @@ import UnitTableEmptyState from './UnitTableEmptyState';
 import UnitTableFooter from './UnitTableFooter';
 
 const UnitsStep: FC = () => {
-  const { formData, selectedBuildingIndex } = usePropertyCreationWizard();
-  const { buildings } = formData;
+  const buildings = useBuildings();
+  const selectedBuildingIndex = useSelectedBuildingIndex();
 
   // Ensure selectedBuildingIndex is valid
   const validBuildingIndex =
@@ -96,7 +96,11 @@ const UnitsStep: FC = () => {
                 <UnitTableEmptyState />
               ) : (
                 selectedBuilding?.units.map((_, unitIndex) => (
-                  <UnitTableRow key={unitIndex} unitIndex={unitIndex} />
+                  <UnitTableRow
+                    key={unitIndex}
+                    buildingIndex={validBuildingIndex}
+                    unitIndex={unitIndex}
+                  />
                 ))
               )}
             </TableBody>

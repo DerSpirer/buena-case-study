@@ -1,10 +1,10 @@
 import type { FC } from 'react';
 import { Box, Typography, alpha } from '@mui/material';
-import { usePropertyCreationWizard } from '../../usePropertyCreationWizard';
+import { useBuilding, useSelectedBuildingIndex } from '../../wizardStore';
 
 const UnitTableFooter: FC = () => {
-  const { formData, selectedBuildingIndex } = usePropertyCreationWizard();
-  const building = formData.buildings[selectedBuildingIndex];
+  const selectedBuildingIndex = useSelectedBuildingIndex();
+  const building = useBuilding(selectedBuildingIndex);
   const units = building?.units ?? [];
 
   if (units.length === 0) return null;
