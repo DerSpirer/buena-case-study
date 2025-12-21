@@ -3,12 +3,15 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   ParseUUIDPipe,
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PropertyService } from './property.service';
@@ -40,6 +43,12 @@ export class PropertyController {
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Property> {
     return this.propertyService.findOne(id);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    return this.propertyService.delete(id);
   }
 
   @Post('upload')

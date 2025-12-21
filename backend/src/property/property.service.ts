@@ -138,6 +138,25 @@ export class PropertyService {
     return property;
   }
 
+  async delete(id: string): Promise<void> {
+    const property = await this.findOne(id);
+
+    // Delete all units from all buildings first
+    const unitIds = property.buildings.flatMap((b) => b.units.map((u) => u.id));
+    if (unitIds.length > 0) {
+      await this.unitRepository.delete(unitIds);
+    }
+
+    // Delete all buildings
+    const buildingIds = property.buildings.map((b) => b.id);
+    if (buildingIds.length > 0) {
+      await this.buildingRepository.delete(buildingIds);
+    }
+
+    // Delete the property
+    await this.propertyRepository.delete(id);
+  }
+
   async saveFile(file: {
     originalname: string;
     buffer: Buffer;

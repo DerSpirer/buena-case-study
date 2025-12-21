@@ -71,4 +71,9 @@ export const propertyApi = {
     );
     return data;
   },
+
+  /** Delete a property by ID */
+  async delete(id: string): Promise<void> {
+    await apiClient.delete(`/properties/${id}`);
+  },
 };

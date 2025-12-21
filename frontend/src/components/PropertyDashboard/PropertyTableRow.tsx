@@ -1,11 +1,13 @@
-import { Chip, TableCell, TableRow, Typography } from '@mui/material';
+import { Chip, IconButton, TableCell, TableRow, Tooltip, Typography } from '@mui/material';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import DeleteIcon from '@mui/icons-material/Delete';
 import type { PropertySummary } from '../../types/Property';
 
 interface PropertyTableRowProps {
   property: PropertySummary;
   onClick: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const PropertyTypeChip = ({ type }: { type: PropertySummary['managementType'] }) => {
@@ -26,9 +28,14 @@ const PropertyTypeChip = ({ type }: { type: PropertySummary['managementType'] })
   );
 };
 
-const PropertyTableRow = ({ property, onClick }: PropertyTableRowProps) => {
+const PropertyTableRow = ({ property, onClick, onDelete }: PropertyTableRowProps) => {
   // Use first 8 chars of UUID as display ID
   const shortId = property.id.slice(0, 8).toUpperCase();
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click
+    onDelete(property.id);
+  };
 
   return (
     <TableRow
@@ -46,6 +53,21 @@ const PropertyTableRow = ({ property, onClick }: PropertyTableRowProps) => {
         <Typography variant="mono" color="text.secondary">
           {shortId}
         </Typography>
+      </TableCell>
+      <TableCell align="right" sx={{ width: 60 }}>
+        <Tooltip title="Delete property">
+          <IconButton
+            size="small"
+            color="error"
+            onClick={handleDelete}
+            sx={{
+              opacity: 0.6,
+              '&:hover': { opacity: 1 },
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </TableCell>
     </TableRow>
   );

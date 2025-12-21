@@ -4,6 +4,11 @@ import {
   Button,
   CircularProgress,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Paper,
   Table,
   TableBody,
@@ -27,6 +32,8 @@ const PropertyDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingProperty, setIsLoadingProperty] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<PropertySummary | null>(null);
 
   const loadProperty = useLoadProperty();
   const reset = useReset();
@@ -77,6 +84,35 @@ const PropertyDashboard = () => {
     fetchProperties();
   };
 
+  const handleDeleteClick = (id: string) => {
+    const property = properties.find((p) => p.id === id);
+    if (property) {
+      setPropertyToDelete(property);
+      setDeleteDialogOpen(true);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setPropertyToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!propertyToDelete) return;
+
+    setDeleteDialogOpen(false);
+    setIsLoading(true);
+    try {
+      await propertyApi.delete(propertyToDelete.id);
+      setPropertyToDelete(null);
+      await fetchProperties();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete property';
+      setError(message);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', background: 'background.gradient', py: 6, px: 4 }}>
       <Container>
@@ -119,18 +155,19 @@ const PropertyDashboard = () => {
                   <TableCell>Name</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell>Unique Number</TableCell>
+                  <TableCell align="right" sx={{ width: 60 }} />
                 </TableRow>
               </TableHead>
               <TableBody>
                 {error ? (
                   <TableRow>
-                    <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
                       <Typography color="error">{error}</Typography>
                     </TableCell>
                   </TableRow>
                 ) : properties.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
                       <Typography color="text.secondary">No properties yet. Create your first property!</Typography>
                     </TableCell>
                   </TableRow>
@@ -140,6 +177,7 @@ const PropertyDashboard = () => {
                       key={property.id}
                       property={property}
                       onClick={handlePropertyClick}
+                      onDelete={handleDeleteClick}
                     />
                   ))
                 )}
@@ -169,6 +207,22 @@ const PropertyDashboard = () => {
 
       {/* Property Creation Wizard */}
       <PropertyCreationWizard open={wizardOpen} onClose={handleCloseWizard} onSuccess={handleWizardSuccess} />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Delete Property</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete <strong>{propertyToDelete?.name}</strong>? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
