@@ -96,7 +96,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.floor || ''}
+          value={unit.floor}
           onChange={(e) => handleNumberChange('floor', e.target.value)}
           placeholder="0"
           size="small"
@@ -140,7 +140,7 @@ const UnitTableRow: FC<UnitTableRowProps> = ({ buildingIndex, unitIndex }) => {
       <TableCell sx={{ py: 0.75 }}>
         <TextField
           type="number"
-          value={unit.rooms || ''}
+          value={unit.rooms}
           onChange={(e) => handleNumberChange('rooms', e.target.value)}
           placeholder="0"
           size="small"
