@@ -25,6 +25,8 @@ import {
   useReset,
   useIsCurrentStepValid,
   usePayload,
+  useEditingPropertyId,
+  useIsEditMode,
 } from './wizardStore';
 import type { ManagementType } from '../../types/Property';
 import { propertyApi } from '../../api/propertyApi';
@@ -47,6 +49,8 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
   const reset = useReset();
   const isCurrentStepValid = useIsCurrentStepValid();
   const payload = usePayload();
+  const editingPropertyId = useEditingPropertyId();
+  const isEditMode = useIsEditMode();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,10 +77,15 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
         ...payload,
         managementType: payload.managementType as ManagementType,
       };
-      await propertyApi.create(apiPayload);
+
+      if (isEditMode && editingPropertyId) {
+        await propertyApi.update(editingPropertyId, apiPayload);
+      } else {
+        await propertyApi.create(apiPayload);
+      }
       handleSuccess();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create property';
+      const message = err instanceof Error ? err.message : `Failed to ${isEditMode ? 'update' : 'create'} property`;
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -107,6 +116,14 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
   };
 
   const isLastStep = activeStep === steps.length - 1;
+  const dialogTitle = isEditMode ? 'Edit Property' : 'Create New Property';
+  const submitButtonText = isEditMode
+    ? isSubmitting
+      ? 'Saving...'
+      : 'Save Changes'
+    : isSubmitting
+    ? 'Creating...'
+    : 'Create Property';
 
   return (
     <>
@@ -129,7 +146,7 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
           }}
         >
           <Typography variant="h6" fontWeight={600} color="text.primary">
-            Create New Property
+            {dialogTitle}
           </Typography>
           <IconButton onClick={handleClose} size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
             <CloseIcon fontSize="small" />
@@ -229,7 +246,7 @@ const WizardContent = ({ onClose, onSuccess }: { onClose: () => void; onSuccess?
               )
             }
           >
-            {isLastStep ? (isSubmitting ? 'Creating...' : 'Create Property') : 'Next'}
+            {isLastStep ? submitButtonText : 'Next'}
           </Button>
         </Box>
       </Box>

@@ -3,19 +3,20 @@ import { useShallow } from 'zustand/react/shallow';
 import type {
   ManagementType,
   UnitType,
-  CreateUnitPayload,
-  CreateBuildingPayload,
-  CreatePropertyPayload,
+  UnitPayload,
+  BuildingPayload,
+  PropertyPayload,
+  Property,
 } from '../../types/Property';
 
 // Re-export types for convenience
-export type { ManagementType, UnitType, CreateUnitPayload, CreateBuildingPayload, CreatePropertyPayload };
+export type { ManagementType, UnitType, UnitPayload, BuildingPayload, PropertyPayload };
 
 // ============================================================================
 // Initial/empty values
 // ============================================================================
 
-const createEmptyPayload = (): CreatePropertyPayload => ({
+const createEmptyPayload = (): PropertyPayload => ({
   managementType: '',
   name: '',
   propertyManager: '',
@@ -24,7 +25,7 @@ const createEmptyPayload = (): CreatePropertyPayload => ({
   buildings: [],
 });
 
-const createEmptyUnit = (): CreateUnitPayload => ({
+const createEmptyUnit = (): UnitPayload => ({
   unitNumber: '',
   type: 'Apartment',
   floor: 0,
@@ -35,7 +36,7 @@ const createEmptyUnit = (): CreateUnitPayload => ({
   rooms: 0,
 });
 
-const createEmptyBuilding = (): CreateBuildingPayload => ({
+const createEmptyBuilding = (): BuildingPayload => ({
   street: '',
   houseNumber: '',
   city: '',
@@ -45,19 +46,22 @@ const createEmptyBuilding = (): CreateBuildingPayload => ({
 });
 
 // Stable empty array reference to avoid creating new arrays in selectors
-const EMPTY_UNITS: CreateUnitPayload[] = [];
+const EMPTY_UNITS: UnitPayload[] = [];
 
 // ============================================================================
 // Store
 // ============================================================================
 
 interface WizardState {
+  // Edit mode - if set, we're editing an existing property
+  editingPropertyId: string | null;
+
   // Navigation
   activeStep: number;
   selectedBuildingIndex: number;
 
-  // The payload we're building - matches backend CreatePropertyDto
-  payload: CreatePropertyPayload;
+  // The payload we're building - matches backend PropertyDto
+  payload: PropertyPayload;
 }
 
 interface WizardActions {
@@ -66,42 +70,47 @@ interface WizardActions {
   setSelectedBuildingIndex: (index: number | ((prev: number) => number)) => void;
 
   // Payload updates
-  updatePayload: <K extends keyof CreatePropertyPayload>(
+  updatePayload: <K extends keyof PropertyPayload>(
     field: K,
-    value: CreatePropertyPayload[K]
+    value: PropertyPayload[K]
   ) => void;
 
   // Buildings
   addBuilding: () => void;
-  updateBuilding: <K extends keyof CreateBuildingPayload>(
+  updateBuilding: <K extends keyof BuildingPayload>(
     index: number,
     field: K,
-    value: CreateBuildingPayload[K]
+    value: BuildingPayload[K]
   ) => void;
   deleteBuilding: (index: number) => void;
 
   // Units
   addUnit: (buildingIndex: number) => void;
   addMultipleUnits: (buildingIndex: number, count: number) => void;
-  updateUnit: <K extends keyof CreateUnitPayload>(
+  updateUnit: <K extends keyof UnitPayload>(
     buildingIndex: number,
     unitIndex: number,
     field: K,
-    value: CreateUnitPayload[K]
+    value: UnitPayload[K]
   ) => void;
   duplicateUnit: (buildingIndex: number, unitIndex: number) => void;
   deleteUnit: (buildingIndex: number, unitIndex: number) => void;
 
   // Utility
   reset: () => void;
-  getPayload: () => CreatePropertyPayload;
-  setExtractedData: (data: Partial<CreatePropertyPayload>) => void;
+  getPayload: () => PropertyPayload;
+  setExtractedData: (data: Partial<PropertyPayload>) => void;
+
+  // Edit mode
+  isEditMode: () => boolean;
+  loadProperty: (property: Property) => void;
 }
 
 export type WizardStore = WizardState & WizardActions;
 
 export const useWizardStore = create<WizardStore>((set, get) => ({
   // Initial state
+  editingPropertyId: null,
   activeStep: 0,
   selectedBuildingIndex: 0,
   payload: createEmptyPayload(),
@@ -200,11 +209,17 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
       const unit = state.payload.buildings[buildingIndex]?.units[unitIndex];
       if (!unit) return state;
 
+      // When duplicating, remove the id so it creates a new unit
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, ...unitWithoutId } = unit;
+
       return {
         payload: {
           ...state.payload,
           buildings: state.payload.buildings.map((b, i) =>
-            i === buildingIndex ? { ...b, units: [...b.units, { ...unit, unitNumber: '' }] } : b
+            i === buildingIndex
+              ? { ...b, units: [...b.units, { ...unitWithoutId, unitNumber: '' }] }
+              : b
           ),
         },
       };
@@ -225,6 +240,7 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
   // Utility
   reset: () =>
     set({
+      editingPropertyId: null,
       activeStep: 0,
       selectedBuildingIndex: 0,
       payload: createEmptyPayload(),
@@ -238,11 +254,53 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
     set((state) => ({
       payload: { ...state.payload, ...data },
     })),
+
+  // Edit mode helpers
+  isEditMode: () => get().editingPropertyId !== null,
+
+  // Load an existing property into the store for editing
+  loadProperty: (property: Property) =>
+    set({
+      editingPropertyId: property.id,
+      activeStep: 0,
+      selectedBuildingIndex: 0,
+      payload: {
+        managementType: property.managementType,
+        name: property.name,
+        propertyManager: property.propertyManager,
+        accountant: property.accountant,
+        declarationFileName: property.declarationFileName,
+        buildings: property.buildings.map((building) => ({
+          id: building.id,
+          street: building.street,
+          houseNumber: building.houseNumber,
+          city: building.city,
+          postalCode: building.postalCode,
+          country: building.country,
+          units: building.units.map((unit) => ({
+            id: unit.id,
+            unitNumber: unit.unitNumber,
+            type: unit.type,
+            floor: unit.floor,
+            entrance: unit.entrance ?? undefined,
+            size: Number(unit.size),
+            coOwnershipShare: Number(unit.coOwnershipShare),
+            constructionYear: unit.constructionYear,
+            rooms: unit.rooms,
+          })),
+        })),
+      },
+    }),
 }));
 
 // ============================================================================
 // Selector hooks
 // ============================================================================
+
+// Edit mode
+export const useEditingPropertyId = () => useWizardStore((state) => state.editingPropertyId);
+export const useIsEditMode = () => useWizardStore((state) => state.editingPropertyId !== null);
+export const useLoadProperty = () => useWizardStore((state) => state.loadProperty);
 
 // Navigation
 export const useActiveStep = () => useWizardStore((state) => state.activeStep);
@@ -254,7 +312,7 @@ export const useSetSelectedBuildingIndex = () =>
 
 // Payload field selectors
 export const usePayload = () => useWizardStore((state) => state.payload);
-export const usePayloadField = <K extends keyof CreatePropertyPayload>(field: K) =>
+export const usePayloadField = <K extends keyof PropertyPayload>(field: K) =>
   useWizardStore((state) => state.payload[field]);
 export const useUpdatePayload = () => useWizardStore((state) => state.updatePayload);
 
@@ -302,7 +360,7 @@ export const useUnitActions = () =>
 // Validation functions
 // ============================================================================
 
-export const isStep1Valid = (payload: CreatePropertyPayload): boolean => {
+export const isStep1Valid = (payload: PropertyPayload): boolean => {
   return (
     (payload.managementType === 'WEG' || payload.managementType === 'MV') &&
     payload.name.trim().length > 0 &&
@@ -312,7 +370,7 @@ export const isStep1Valid = (payload: CreatePropertyPayload): boolean => {
   );
 };
 
-const isUnitValid = (unit: CreateUnitPayload): boolean => {
+const isUnitValid = (unit: UnitPayload): boolean => {
   const currentYear = new Date().getFullYear();
   const validTypes: UnitType[] = ['Apartment', 'Office', 'Garden', 'Parking'];
 
@@ -331,7 +389,7 @@ const isUnitValid = (unit: CreateUnitPayload): boolean => {
   );
 };
 
-const isBuildingAddressValid = (building: CreateBuildingPayload): boolean => {
+const isBuildingAddressValid = (building: BuildingPayload): boolean => {
   return (
     building.street.trim().length > 0 &&
     building.houseNumber.trim().length > 0 &&
@@ -341,7 +399,7 @@ const isBuildingAddressValid = (building: CreateBuildingPayload): boolean => {
   );
 };
 
-const isBuildingValid = (building: CreateBuildingPayload): boolean => {
+const isBuildingValid = (building: BuildingPayload): boolean => {
   return (
     isBuildingAddressValid(building) &&
     building.units.length >= 1 &&
@@ -349,13 +407,13 @@ const isBuildingValid = (building: CreateBuildingPayload): boolean => {
   );
 };
 
-export const isStep2Valid = (payload: CreatePropertyPayload): boolean => {
+export const isStep2Valid = (payload: PropertyPayload): boolean => {
   if (payload.buildings.length === 0) return false;
 
   return payload.buildings.every(isBuildingAddressValid);
 };
 
-export const isStep3Valid = (payload: CreatePropertyPayload): boolean => {
+export const isStep3Valid = (payload: PropertyPayload): boolean => {
   if (payload.buildings.length === 0) return false;
 
   return payload.buildings.every(
@@ -363,7 +421,7 @@ export const isStep3Valid = (payload: CreatePropertyPayload): boolean => {
   );
 };
 
-export const isPayloadValid = (payload: CreatePropertyPayload): boolean => {
+export const isPayloadValid = (payload: PropertyPayload): boolean => {
   return (
     isStep1Valid(payload) &&
     payload.buildings.length >= 1 &&

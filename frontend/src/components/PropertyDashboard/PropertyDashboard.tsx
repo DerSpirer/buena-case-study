@@ -15,16 +15,21 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { propertyApi } from '../../api/propertyApi';
-import type { Property } from '../../types/Property';
+import type { PropertySummary } from '../../types/Property';
 import PropertyTableRow from './PropertyTableRow';
 import StatCard from './StatCard';
 import PropertyCreationWizard from '../PropertyCreationWizard';
+import { useLoadProperty, useReset } from '../PropertyCreationWizard/wizardStore';
 
 const PropertyDashboard = () => {
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertySummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingProperty, setIsLoadingProperty] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadProperty = useLoadProperty();
+  const reset = useReset();
 
   const fetchProperties = useCallback(async () => {
     setIsLoading(true);
@@ -45,7 +50,22 @@ const PropertyDashboard = () => {
   }, [fetchProperties]);
 
   const handleCreateProperty = () => {
+    reset(); // Ensure we're in create mode
     setWizardOpen(true);
+  };
+
+  const handlePropertyClick = async (id: string) => {
+    setIsLoadingProperty(true);
+    try {
+      const property = await propertyApi.getById(id);
+      loadProperty(property);
+      setWizardOpen(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load property';
+      setError(message);
+    } finally {
+      setIsLoadingProperty(false);
+    }
   };
 
   const handleCloseWizard = () => {
@@ -94,7 +114,7 @@ const PropertyDashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {isLoading ? (
+              {isLoading || isLoadingProperty ? (
                 <TableRow>
                   <TableCell colSpan={3} align="center" sx={{ py: 4 }}>
                     <CircularProgress size={32} />
@@ -114,7 +134,11 @@ const PropertyDashboard = () => {
                 </TableRow>
               ) : (
                 properties.map((property) => (
-                  <PropertyTableRow key={property.id} property={property} />
+                  <PropertyTableRow
+                    key={property.id}
+                    property={property}
+                    onClick={handlePropertyClick}
+                  />
                 ))
               )}
             </TableBody>

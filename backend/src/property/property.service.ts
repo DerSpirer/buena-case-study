@@ -121,7 +121,6 @@ export class PropertyService {
 
   async findAll(): Promise<Property[]> {
     return this.propertyRepository.find({
-      relations: ['buildings', 'buildings.units'],
       order: { createdAt: 'DESC' },
     });
   }

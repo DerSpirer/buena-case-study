@@ -1,13 +1,14 @@
 import { Chip, TableCell, TableRow, Typography } from '@mui/material';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import type { Property } from '../../types/Property';
+import type { PropertySummary } from '../../types/Property';
 
 interface PropertyTableRowProps {
-  property: Property;
+  property: PropertySummary;
+  onClick: (id: string) => void;
 }
 
-const PropertyTypeChip = ({ type }: { type: Property['managementType'] }) => {
+const PropertyTypeChip = ({ type }: { type: PropertySummary['managementType'] }) => {
   const isWEG = type === 'WEG';
 
   return (
@@ -25,12 +26,16 @@ const PropertyTypeChip = ({ type }: { type: Property['managementType'] }) => {
   );
 };
 
-const PropertyTableRow = ({ property }: PropertyTableRowProps) => {
+const PropertyTableRow = ({ property, onClick }: PropertyTableRowProps) => {
   // Use first 8 chars of UUID as display ID
   const shortId = property.id.slice(0, 8).toUpperCase();
 
   return (
-    <TableRow>
+    <TableRow
+      hover
+      onClick={() => onClick(property.id)}
+      sx={{ cursor: 'pointer' }}
+    >
       <TableCell>
         <Typography variant="bodyEmphasis">{property.name}</Typography>
       </TableCell>

@@ -6,11 +6,69 @@ export type ManagementType = 'WEG' | 'MV';
 export type UnitType = 'Apartment' | 'Office' | 'Garden' | 'Parking';
 
 // ============================================================================
-// Create Payloads (matching backend DTOs)
+// Entity Types (returned from API)
 // ============================================================================
 
-/** Matches backend CreateUnitDto */
-export interface CreateUnitPayload {
+/** Unit entity returned from API (with ID) */
+export interface Unit {
+  id: string;
+  unitNumber: string;
+  type: UnitType;
+  floor: number;
+  entrance: string | null;
+  size: number;
+  coOwnershipShare: number;
+  constructionYear: number;
+  rooms: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Building entity returned from API (with ID and units) */
+export interface Building {
+  id: string;
+  street: string;
+  houseNumber: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  units: Unit[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Full property entity returned from GET /properties/:id */
+export interface Property {
+  id: string;
+  managementType: ManagementType;
+  name: string;
+  propertyManager: string;
+  accountant: string;
+  declarationFileName: string;
+  buildings: Building[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Lightweight property for list view (GET /properties) */
+export interface PropertySummary {
+  id: string;
+  managementType: ManagementType;
+  name: string;
+  propertyManager: string;
+  accountant: string;
+  declarationFileName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// Payload Types (sent to API for create/update)
+// ============================================================================
+
+/** Unit payload - id is optional (include for update, omit for create) */
+export interface UnitPayload {
+  id?: string;
   unitNumber: string;
   type: UnitType;
   floor: number;
@@ -21,39 +79,25 @@ export interface CreateUnitPayload {
   rooms: number;
 }
 
-/** Matches backend CreateBuildingDto */
-export interface CreateBuildingPayload {
+/** Building payload - id is optional (include for update, omit for create) */
+export interface BuildingPayload {
+  id?: string;
   street: string;
   houseNumber: string;
   city: string;
   postalCode: string;
   country: string;
-  units: CreateUnitPayload[];
+  units: UnitPayload[];
 }
 
-/** Matches backend CreatePropertyDto - this is what we send to the API */
-export interface CreatePropertyPayload {
+/** Property payload for create/update - same structure, IDs determine create vs update */
+export interface PropertyPayload {
   managementType: ManagementType | '';
   name: string;
   propertyManager: string;
   accountant: string;
   declarationFileName: string;
-  buildings: CreateBuildingPayload[];
-}
-
-// ============================================================================
-// Entity Types (returned from API)
-// ============================================================================
-
-export interface Property {
-  id: string;
-  managementType: ManagementType;
-  name: string;
-  propertyManager: string;
-  accountant: string;
-  declarationFileName: string;
-  createdAt: Date;
-  updatedAt: Date;
+  buildings: BuildingPayload[];
 }
 
 // ============================================================================
@@ -67,6 +111,5 @@ export interface UploadFileResponse {
 
 export interface ExtractWithAIResponse {
   message: string;
-  data: Partial<CreatePropertyPayload>;
+  data: Partial<PropertyPayload>;
 }
-
