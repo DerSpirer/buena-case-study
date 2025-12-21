@@ -26,6 +26,7 @@ const createEmptyPayload = (): PropertyPayload => ({
 });
 
 const createEmptyUnit = (): UnitPayload => ({
+  _tempId: crypto.randomUUID(),
   unitNumber: '',
   type: 'Apartment',
   floor: 0,
@@ -37,6 +38,7 @@ const createEmptyUnit = (): UnitPayload => ({
 });
 
 const createEmptyBuilding = (): BuildingPayload => ({
+  _tempId: crypto.randomUUID(),
   street: '',
   houseNumber: '',
   city: '',
@@ -209,16 +211,16 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
       const unit = state.payload.buildings[buildingIndex]?.units[unitIndex];
       if (!unit) return state;
 
-      // When duplicating, remove the id so it creates a new unit
+      // When duplicating, remove the id so it creates a new unit, and generate a new _tempId
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id: _id, ...unitWithoutId } = unit;
+      const { id: _id, _tempId: _oldTempId, ...unitWithoutIds } = unit;
 
       return {
         payload: {
           ...state.payload,
           buildings: state.payload.buildings.map((b, i) =>
             i === buildingIndex
-              ? { ...b, units: [...b.units, { ...unitWithoutId, unitNumber: '' }] }
+              ? { ...b, units: [...b.units, { ...unitWithoutIds, _tempId: crypto.randomUUID(), unitNumber: '' }] }
               : b
           ),
         },
@@ -248,29 +250,39 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
 
   // Returns the payload object ready to send to the API
   // Sanitizes unit data to ensure null values are converted to proper defaults
+  // Strips _tempId fields which are only used for React keys
   getPayload: () => {
     const payload = get().payload;
     return {
       ...payload,
-      buildings: payload.buildings.map((building) => ({
-        ...building,
-        units: building.units.map((unit) => ({
-          ...unit,
-          // Ensure numeric fields are never null
-          floor: unit.floor ?? 0,
-          size: unit.size ?? 0,
-          coOwnershipShare: unit.coOwnershipShare ?? 0,
-          constructionYear: unit.constructionYear ?? new Date().getFullYear(),
-          rooms: unit.rooms ?? 0,
-          // Convert null entrance to undefined (optional field)
-          entrance: unit.entrance ?? undefined,
-        })),
-      })),
+      buildings: payload.buildings.map((building) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _tempId: _buildingTempId, ...buildingRest } = building;
+        return {
+          ...buildingRest,
+          units: building.units.map((unit) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { _tempId: _unitTempId, ...unitRest } = unit;
+            return {
+              ...unitRest,
+              // Ensure numeric fields are never null
+              floor: unit.floor ?? 0,
+              size: unit.size ?? 0,
+              coOwnershipShare: unit.coOwnershipShare ?? 0,
+              constructionYear: unit.constructionYear ?? new Date().getFullYear(),
+              rooms: unit.rooms ?? 0,
+              // Convert null entrance to undefined (optional field)
+              entrance: unit.entrance ?? undefined,
+            };
+          }),
+        };
+      }),
     };
   },
 
   // Set extracted data from AI, merging with existing payload
   // Sanitizes unit data to ensure null values are converted to proper defaults
+  // Adds _tempId for React keys
   setExtractedData: (data) =>
     set((state) => {
       // Sanitize buildings and units if present
@@ -278,8 +290,10 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
       if (sanitizedData.buildings) {
         sanitizedData.buildings = sanitizedData.buildings.map((building) => ({
           ...building,
+          _tempId: building._tempId ?? crypto.randomUUID(),
           units: building.units.map((unit) => ({
             ...unit,
+            _tempId: unit._tempId ?? crypto.randomUUID(),
             // Ensure numeric fields are never null
             floor: unit.floor ?? 0,
             size: unit.size ?? 0,
@@ -303,6 +317,7 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
   isEditMode: () => get().editingPropertyId !== null,
 
   // Load an existing property into the store for editing
+  // Uses entity IDs as _tempId since they're already stable
   loadProperty: (property: Property) =>
     set({
       editingPropertyId: property.id,
@@ -316,6 +331,7 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
         declarationFileName: property.declarationFileName,
         buildings: property.buildings.map((building) => ({
           id: building.id,
+          _tempId: building.id, // Use entity ID as stable key
           street: building.street,
           houseNumber: building.houseNumber,
           city: building.city,
@@ -323,6 +339,7 @@ export const useWizardStore = create<WizardStore>((set, get) => ({
           country: building.country,
           units: building.units.map((unit) => ({
             id: unit.id,
+            _tempId: unit.id, // Use entity ID as stable key
             unitNumber: unit.unitNumber,
             type: unit.type,
             floor: unit.floor,

@@ -69,6 +69,8 @@ export interface PropertySummary {
 /** Unit payload - id is optional (include for update, omit for create) */
 export interface UnitPayload {
   id?: string;
+  /** Temporary ID for React keys during creation (not sent to API) */
+  _tempId?: string;
   unitNumber: string;
   type: UnitType;
   floor: number;
@@ -82,6 +84,8 @@ export interface UnitPayload {
 /** Building payload - id is optional (include for update, omit for create) */
 export interface BuildingPayload {
   id?: string;
+  /** Temporary ID for React keys during creation (not sent to API) */
+  _tempId?: string;
   street: string;
   houseNumber: string;
   city: string;

@@ -94,9 +94,9 @@ const UnitsStep: FC = () => {
               {selectedBuilding?.units.length === 0 ? (
                 <UnitTableEmptyState />
               ) : (
-                selectedBuilding?.units.map((_, unitIndex) => (
+                selectedBuilding?.units.map((unit, unitIndex) => (
                   <UnitTableRow
-                    key={unitIndex}
+                    key={unit._tempId ?? unitIndex}
                     buildingIndex={validBuildingIndex}
                     unitIndex={unitIndex}
                   />

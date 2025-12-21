@@ -40,7 +40,7 @@ const BuildingSelector: FC = () => {
               : `Building ${index + 1}`;
 
           return (
-            <MenuItem key={index} value={index}>
+            <MenuItem key={building._tempId ?? index} value={index}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {label}
                 <Chip

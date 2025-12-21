@@ -64,8 +64,8 @@ const BuildingDataStep: FC = () => {
         </Box>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {buildings.map((_, index) => (
-            <BuildingCard key={index} index={index} />
+          {buildings.map((building, index) => (
+            <BuildingCard key={building._tempId ?? index} index={index} />
           ))}
 
           {/* Add More Button */}
