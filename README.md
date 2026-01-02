@@ -1,3 +1,9 @@
+## Video Walkthrough
+
+https://www.youtube.com/watch?v=-Kd4QILADaE
+
+---
+
 # Buena Case Study
 
 ## Stack
